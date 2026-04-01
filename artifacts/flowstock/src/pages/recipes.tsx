@@ -187,7 +187,7 @@ export default function Recipes() {
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <FormLabel>Ingredients per Serving</FormLabel>
+                    <label className="text-sm font-medium leading-none">Ingredients per Serving</label>
                     <Button 
                       type="button" 
                       variant="outline" 
