@@ -1,16 +1,31 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import { db, salesTable } from "@workspace/db";
 import {
   CreateSaleBody,
   DeleteSaleParams,
   ListSalesResponse,
+  ListSalesQueryParams,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
 router.get("/sales", async (req, res): Promise<void> => {
-  const sales = await db.select().from(salesTable).orderBy(salesTable.createdAt);
+  const query = ListSalesQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: query.error.message });
+    return;
+  }
+  const { storeId } = query.data;
+  const sales = await db
+    .select()
+    .from(salesTable)
+    .where(
+      storeId != null
+        ? eq(salesTable.storeId, storeId)
+        : isNull(salesTable.storeId)
+    )
+    .orderBy(salesTable.createdAt);
   res.json(ListSalesResponse.parse(sales));
 });
 

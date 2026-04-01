@@ -9,6 +9,9 @@ import Inventory from "@/pages/inventory";
 import Sales from "@/pages/sales";
 import Recipes from "@/pages/recipes";
 import Recommendations from "@/pages/recommendations";
+import Organizations from "@/pages/organizations/index";
+import OrganizationDetails from "@/pages/organizations/[id]";
+import { StoreProvider } from "@/hooks/use-store";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +24,8 @@ function Router() {
         <Route path="/sales" component={Sales} />
         <Route path="/recipes" component={Recipes} />
         <Route path="/recommendations" component={Recommendations} />
+        <Route path="/organizations" component={Organizations} />
+        <Route path="/organizations/:orgId" component={OrganizationDetails} />
         <Route component={NotFound} />
       </Switch>
     </Shell>
@@ -30,12 +35,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <StoreProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </StoreProvider>
     </QueryClientProvider>
   );
 }

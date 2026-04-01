@@ -3,12 +3,11 @@
  * Do not edit manually.
  * Api
  * FlowStock API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import * as zod from "zod";
 
 /**
- * Returns server health status
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({
@@ -16,10 +15,127 @@ export const HealthCheckResponse = zod.object({
 });
 
 /**
- * @summary List all inventory items
+ * @summary List all organizations
  */
+export const ListOrganizationsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListOrganizationsResponse = zod.array(
+  ListOrganizationsResponseItem,
+);
+
+/**
+ * @summary Create an organization
+ */
+export const CreateOrganizationBody = zod.object({
+  name: zod.string(),
+});
+
+/**
+ * @summary Delete an organization
+ */
+export const DeleteOrganizationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List stores for an organization
+ */
+export const ListStoresParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListStoresResponseItem = zod.object({
+  id: zod.number(),
+  organizationId: zod.number(),
+  name: zod.string(),
+  address: zod.string().optional(),
+  createdAt: zod.coerce.date(),
+});
+export const ListStoresResponse = zod.array(ListStoresResponseItem);
+
+/**
+ * @summary Add a store to an organization
+ */
+export const CreateStoreParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CreateStoreBody = zod.object({
+  name: zod.string(),
+  address: zod.string().optional(),
+});
+
+/**
+ * @summary Delete a store
+ */
+export const DeleteStoreParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List company-wide recipes for an organization
+ */
+export const ListCompanyRecipesParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListCompanyRecipesResponseItem = zod.object({
+  id: zod.number(),
+  menuItem: zod.string(),
+  ingredients: zod.array(
+    zod.object({
+      ingredientName: zod.string(),
+      amountPerServing: zod.number(),
+    }),
+  ),
+  organizationId: zod.number().optional(),
+  storeId: zod.number().optional(),
+  isCompanyRecipe: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+export const ListCompanyRecipesResponse = zod.array(
+  ListCompanyRecipesResponseItem,
+);
+
+/**
+ * @summary Create a company-wide recipe for an organization
+ */
+export const CreateCompanyRecipeParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const CreateCompanyRecipeBody = zod.object({
+  menuItem: zod.string(),
+  ingredients: zod.array(
+    zod.object({
+      ingredientName: zod.string(),
+      amountPerServing: zod.number(),
+    }),
+  ),
+  storeId: zod.number().optional(),
+});
+
+/**
+ * @summary Delete a company recipe
+ */
+export const DeleteCompanyRecipeParams = zod.object({
+  id: zod.coerce.number(),
+  recipeId: zod.coerce.number(),
+});
+
+/**
+ * @summary List inventory items, optionally scoped to a store
+ */
+export const ListInventoryQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+});
+
 export const ListInventoryResponseItem = zod.object({
   id: zod.number(),
+  storeId: zod.number().optional(),
   name: zod.string(),
   stock: zod.number(),
   unit: zod.string(),
@@ -32,6 +148,7 @@ export const ListInventoryResponse = zod.array(ListInventoryResponseItem);
  * @summary Add inventory item
  */
 export const CreateInventoryItemBody = zod.object({
+  storeId: zod.number().optional(),
   name: zod.string(),
   stock: zod.number(),
   unit: zod.string(),
@@ -54,6 +171,7 @@ export const UpdateInventoryItemBody = zod.object({
 
 export const UpdateInventoryItemResponse = zod.object({
   id: zod.number(),
+  storeId: zod.number().optional(),
   name: zod.string(),
   stock: zod.number(),
   unit: zod.string(),
@@ -69,10 +187,15 @@ export const DeleteInventoryItemParams = zod.object({
 });
 
 /**
- * @summary List all sales
+ * @summary List sales, optionally scoped to a store
  */
+export const ListSalesQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+});
+
 export const ListSalesResponseItem = zod.object({
   id: zod.number(),
+  storeId: zod.number().optional(),
   menuItem: zod.string(),
   quantity: zod.number(),
   createdAt: zod.coerce.date(),
@@ -83,6 +206,7 @@ export const ListSalesResponse = zod.array(ListSalesResponseItem);
  * @summary Log a sale
  */
 export const CreateSaleBody = zod.object({
+  storeId: zod.number().optional(),
   menuItem: zod.string(),
   quantity: zod.number(),
 });
@@ -95,8 +219,13 @@ export const DeleteSaleParams = zod.object({
 });
 
 /**
- * @summary List all recipes
+ * @summary List store-level recipes, optionally merged with company recipes
  */
+export const ListRecipesQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+  organizationId: zod.coerce.number().optional(),
+});
+
 export const ListRecipesResponseItem = zod.object({
   id: zod.number(),
   menuItem: zod.string(),
@@ -106,12 +235,15 @@ export const ListRecipesResponseItem = zod.object({
       amountPerServing: zod.number(),
     }),
   ),
+  organizationId: zod.number().optional(),
+  storeId: zod.number().optional(),
+  isCompanyRecipe: zod.boolean(),
   createdAt: zod.coerce.date(),
 });
 export const ListRecipesResponse = zod.array(ListRecipesResponseItem);
 
 /**
- * @summary Create a recipe
+ * @summary Create a store-level recipe
  */
 export const CreateRecipeBody = zod.object({
   menuItem: zod.string(),
@@ -121,18 +253,24 @@ export const CreateRecipeBody = zod.object({
       amountPerServing: zod.number(),
     }),
   ),
+  storeId: zod.number().optional(),
 });
 
 /**
- * @summary Delete a recipe
+ * @summary Delete a store-level recipe
  */
 export const DeleteRecipeParams = zod.object({
   id: zod.coerce.number(),
 });
 
 /**
- * @summary Get reorder recommendations based on sales and stock
+ * @summary Get reorder recommendations, optionally scoped to a store
  */
+export const GetRecommendationsQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+  organizationId: zod.coerce.number().optional(),
+});
+
 export const GetRecommendationsResponseItem = zod.object({
   ingredientName: zod.string(),
   currentStock: zod.number(),
@@ -145,8 +283,13 @@ export const GetRecommendationsResponse = zod.array(
 );
 
 /**
- * @summary Get dashboard summary stats
+ * @summary Get dashboard summary stats, optionally scoped to a store
  */
+export const GetDashboardSummaryQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+  organizationId: zod.coerce.number().optional(),
+});
+
 export const GetDashboardSummaryResponse = zod.object({
   totalInventoryItems: zod.number(),
   totalSales: zod.number(),

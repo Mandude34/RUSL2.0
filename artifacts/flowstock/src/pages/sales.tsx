@@ -25,7 +25,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Loader2, Plus, Search, Trash2, Receipt } from "lucide-react";
+import { Loader2, Plus, Search, Trash2, Receipt, Store as StoreIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -39,6 +39,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { format } from "date-fns";
+import { useStore } from "@/hooks/use-store";
 
 const saleSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
@@ -51,10 +52,17 @@ export default function Sales() {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { selectedStore } = useStore();
 
-  const { data: sales, isLoading } = useListSales({
-    query: { queryKey: getListSalesQueryKey() }
-  });
+  const { data: sales, isLoading } = useListSales(
+    { storeId: selectedStore?.id },
+    {
+      query: { 
+        queryKey: getListSalesQueryKey({ storeId: selectedStore?.id }),
+        enabled: !!selectedStore
+      }
+    }
+  );
 
   const createSale = useCreateSale();
   const deleteSale = useDeleteSale();
@@ -69,10 +77,10 @@ export default function Sales() {
 
   const onSubmit = (values: z.infer<typeof saleSchema>) => {
     createSale.mutate(
-      { data: values },
+      { data: { ...values, storeId: selectedStore?.id } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListSalesQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListSalesQueryKey({ storeId: selectedStore?.id }) });
           toast({ title: "Sale logged successfully" });
           setIsAddOpen(false);
           form.reset();
@@ -89,7 +97,7 @@ export default function Sales() {
       { id },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListSalesQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListSalesQueryKey({ storeId: selectedStore?.id }) });
           toast({ title: "Sale deleted" });
         },
         onError: () => {
@@ -98,6 +106,18 @@ export default function Sales() {
       }
     );
   };
+
+  if (!selectedStore) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <StoreIcon className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold">Select a Store</h2>
+        <p className="text-muted-foreground max-w-md">Please select an organization and a store from the sidebar to manage sales.</p>
+      </div>
+    );
+  }
 
   const filteredSales = sales?.filter(sale => 
     sale.menuItem.toLowerCase().includes(searchQuery.toLowerCase())
@@ -108,7 +128,7 @@ export default function Sales() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Sales</h1>
-          <p className="text-muted-foreground mt-1">Log and track sold menu items.</p>
+          <p className="text-muted-foreground mt-1">Log and track sold menu items for {selectedStore.name}.</p>
         </div>
 
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>

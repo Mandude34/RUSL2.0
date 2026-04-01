@@ -3,18 +3,27 @@
  * Do not edit manually.
  * Api
  * FlowStock API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export * from "./createInventoryItemBody";
+export * from "./createOrganizationBody";
 export * from "./createRecipeBody";
 export * from "./createSaleBody";
+export * from "./createStoreBody";
 export * from "./dashboardSummary";
 export * from "./dashboardSummaryTopMenuItemsItem";
+export * from "./getDashboardSummaryParams";
+export * from "./getRecommendationsParams";
 export * from "./healthStatus";
 export * from "./inventoryItem";
+export * from "./listInventoryParams";
+export * from "./listRecipesParams";
+export * from "./listSalesParams";
+export * from "./organization";
 export * from "./recipe";
 export * from "./recipeIngredient";
 export * from "./recommendation";
 export * from "./sale";
+export * from "./store";
 export * from "./updateInventoryItemBody";

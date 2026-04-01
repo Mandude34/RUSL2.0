@@ -3,11 +3,12 @@
  * Do not edit manually.
  * Api
  * FlowStock API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { RecipeIngredient } from "./recipeIngredient";
 
 export interface CreateRecipeBody {
   menuItem: string;
   ingredients: RecipeIngredient[];
+  storeId?: number;
 }

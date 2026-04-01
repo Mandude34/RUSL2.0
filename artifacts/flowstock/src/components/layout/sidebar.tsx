@@ -1,9 +1,10 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Menu } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Menu, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
+import { StoreSelector } from "./store-selector";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -17,8 +18,8 @@ export function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <div className="hidden border-r bg-card/50 lg:block lg:w-64 lg:shrink-0 lg:flex-col backdrop-blur-md">
-      <div className="flex h-16 items-center border-b px-6">
+    <div className="hidden border-r bg-card/50 lg:flex lg:w-64 lg:shrink-0 lg:flex-col backdrop-blur-md">
+      <div className="flex h-16 shrink-0 items-center border-b px-6">
         <div className="flex items-center gap-2 font-bold tracking-tight text-lg text-primary">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <ChefHat className="h-5 w-5" />
@@ -26,7 +27,8 @@ export function Sidebar() {
           FlowStock
         </div>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-4">
+      <StoreSelector />
+      <nav className="flex flex-1 flex-col gap-1 p-4 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = location === item.href;
           return (
@@ -50,6 +52,25 @@ export function Sidebar() {
             </Link>
           );
         })}
+        
+        <div className="mt-4 pt-4 border-t border-border/50">
+          <Link href="/organizations">
+            <div
+              className={cn(
+                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
+                location.startsWith("/organizations")
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+              )}
+            >
+              <Building2 className={cn(
+                "h-4 w-4 shrink-0 transition-transform duration-200",
+                location.startsWith("/organizations") ? "text-primary" : "text-muted-foreground group-hover:scale-110 group-hover:text-foreground"
+              )} />
+              Organizations
+            </div>
+          </Link>
+        </div>
       </nav>
     </div>
   );
@@ -67,8 +88,8 @@ export function MobileNav() {
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0">
-        <div className="flex h-16 items-center border-b px-6">
+      <SheetContent side="left" className="w-64 p-0 flex flex-col">
+        <div className="flex h-16 shrink-0 items-center border-b px-6">
           <div className="flex items-center gap-2 font-bold tracking-tight text-lg text-primary">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <ChefHat className="h-5 w-5" />
@@ -76,7 +97,8 @@ export function MobileNav() {
             FlowStock
           </div>
         </div>
-        <nav className="flex flex-col gap-1 p-4">
+        <StoreSelector />
+        <nav className="flex flex-col gap-1 p-4 overflow-y-auto">
           {navigation.map((item) => {
             const isActive = location === item.href;
             return (
@@ -100,6 +122,25 @@ export function MobileNav() {
               </Link>
             );
           })}
+          
+          <div className="mt-4 pt-4 border-t border-border/50">
+            <Link href="/organizations" onClick={() => setOpen(false)}>
+              <div
+                className={cn(
+                  "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all",
+                  location.startsWith("/organizations")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                )}
+              >
+                <Building2 className={cn(
+                  "h-4 w-4 shrink-0",
+                  location.startsWith("/organizations") ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )} />
+                Organizations
+              </div>
+            </Link>
+          </div>
         </nav>
       </SheetContent>
     </Sheet>

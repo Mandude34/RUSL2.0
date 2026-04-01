@@ -1,17 +1,48 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, or, isNull, and } from "drizzle-orm";
 import { db, recipesTable } from "@workspace/db";
 import {
   CreateRecipeBody,
   DeleteRecipeParams,
   ListRecipesResponse,
+  ListRecipesQueryParams,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
 router.get("/recipes", async (req, res): Promise<void> => {
-  const recipes = await db.select().from(recipesTable).orderBy(recipesTable.menuItem);
-  res.json(ListRecipesResponse.parse(recipes));
+  const query = ListRecipesQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: query.error.message });
+    return;
+  }
+  const { storeId, organizationId } = query.data;
+
+  let whereClause;
+  if (storeId != null && organizationId != null) {
+    whereClause = or(
+      eq(recipesTable.storeId, storeId),
+      eq(recipesTable.organizationId, organizationId)
+    );
+  } else if (storeId != null) {
+    whereClause = eq(recipesTable.storeId, storeId);
+  } else if (organizationId != null) {
+    whereClause = eq(recipesTable.organizationId, organizationId);
+  } else {
+    whereClause = and(isNull(recipesTable.storeId), isNull(recipesTable.organizationId));
+  }
+
+  const recipes = await db
+    .select()
+    .from(recipesTable)
+    .where(whereClause)
+    .orderBy(recipesTable.menuItem);
+
+  const result = recipes.map((r) => ({
+    ...r,
+    isCompanyRecipe: r.organizationId != null,
+  }));
+  res.json(ListRecipesResponse.parse(result));
 });
 
 router.post("/recipes", async (req, res): Promise<void> => {
@@ -21,7 +52,7 @@ router.post("/recipes", async (req, res): Promise<void> => {
     return;
   }
   const [recipe] = await db.insert(recipesTable).values(parsed.data).returning();
-  res.status(201).json(recipe);
+  res.status(201).json({ ...recipe, isCompanyRecipe: recipe.organizationId != null });
 });
 
 router.delete("/recipes/:id", async (req, res): Promise<void> => {

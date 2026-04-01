@@ -1,9 +1,11 @@
-import { pgTable, text, serial, timestamp, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, doublePrecision, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { storesTable } from "./stores";
 
 export const inventoryTable = pgTable("inventory", {
   id: serial("id").primaryKey(),
+  storeId: integer("store_id").references(() => storesTable.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   stock: doublePrecision("stock").notNull().default(0),
   unit: text("unit").notNull(),

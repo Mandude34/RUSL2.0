@@ -8,19 +8,40 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Loader2, TrendingUp, AlertTriangle, ArrowRight, PackageOpen } from "lucide-react";
+import { Loader2, TrendingUp, AlertTriangle, ArrowRight, PackageOpen, Store as StoreIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useStore } from "@/hooks/use-store";
 
 export default function Recommendations() {
-  const { data: recommendations, isLoading } = useGetRecommendations({
-    query: { queryKey: getGetRecommendationsQueryKey() }
-  });
+  const { selectedStore, selectedOrganization } = useStore();
+
+  const { data: recommendations, isLoading } = useGetRecommendations(
+    { storeId: selectedStore?.id, organizationId: selectedOrganization?.id },
+    {
+      query: { 
+        queryKey: getGetRecommendationsQueryKey({ storeId: selectedStore?.id, organizationId: selectedOrganization?.id }),
+        enabled: !!selectedStore
+      }
+    }
+  );
+
+  if (!selectedStore) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <StoreIcon className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold">Select a Store</h2>
+        <p className="text-muted-foreground max-w-md">Please select an organization and a store from the sidebar to view recommendations.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Reorder Recommendations</h1>
-        <p className="text-muted-foreground mt-1">Smart restock suggestions based on your sales and recipes.</p>
+        <p className="text-muted-foreground mt-1">Smart restock suggestions based on your sales and recipes for {selectedStore.name}.</p>
       </div>
 
       <Card className="border-border/50 bg-card/50 backdrop-blur shadow-sm">

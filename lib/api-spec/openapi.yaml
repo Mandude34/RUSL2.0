@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Api
-  version: 0.1.0
+  version: 0.2.0
   description: FlowStock API specification
 servers:
   - url: /api
@@ -9,6 +9,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: organizations
+    description: Organization management
+  - name: stores
+    description: Store management
   - name: inventory
     description: Inventory management
   - name: sales
@@ -23,7 +27,6 @@ paths:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -32,11 +35,187 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 
+  /organizations:
+    get:
+      operationId: listOrganizations
+      tags: [organizations]
+      summary: List all organizations
+      responses:
+        "200":
+          description: List of organizations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organization"
+    post:
+      operationId: createOrganization
+      tags: [organizations]
+      summary: Create an organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrganizationBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Organization"
+
+  /organizations/{id}:
+    delete:
+      operationId: deleteOrganization
+      tags: [organizations]
+      summary: Delete an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /organizations/{id}/stores:
+    get:
+      operationId: listStores
+      tags: [stores]
+      summary: List stores for an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of stores
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Store"
+    post:
+      operationId: createStore
+      tags: [stores]
+      summary: Add a store to an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStoreBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Store"
+
+  /stores/{id}:
+    delete:
+      operationId: deleteStore
+      tags: [stores]
+      summary: Delete a store
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /organizations/{id}/recipes:
+    get:
+      operationId: listCompanyRecipes
+      tags: [recipes]
+      summary: List company-wide recipes for an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of company recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+    post:
+      operationId: createCompanyRecipe
+      tags: [recipes]
+      summary: Create a company-wide recipe for an organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecipeBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+
+  /organizations/{id}/recipes/{recipeId}:
+    delete:
+      operationId: deleteCompanyRecipe
+      tags: [recipes]
+      summary: Delete a company recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: recipeId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   /inventory:
     get:
       operationId: listInventory
       tags: [inventory]
-      summary: List all inventory items
+      summary: List inventory items, optionally scoped to a store
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: List of inventory items
@@ -106,7 +285,13 @@ paths:
     get:
       operationId: listSales
       tags: [sales]
-      summary: List all sales
+      summary: List sales, optionally scoped to a store
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: List of sales
@@ -153,7 +338,18 @@ paths:
     get:
       operationId: listRecipes
       tags: [recipes]
-      summary: List all recipes
+      summary: List store-level recipes, optionally merged with company recipes
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: List of recipes
@@ -166,7 +362,7 @@ paths:
     post:
       operationId: createRecipe
       tags: [recipes]
-      summary: Create a recipe
+      summary: Create a store-level recipe
       requestBody:
         required: true
         content:
@@ -185,7 +381,7 @@ paths:
     delete:
       operationId: deleteRecipe
       tags: [recipes]
-      summary: Delete a recipe
+      summary: Delete a store-level recipe
       parameters:
         - name: id
           in: path
@@ -200,7 +396,18 @@ paths:
     get:
       operationId: getRecommendations
       tags: [recommendations]
-      summary: Get reorder recommendations based on sales and stock
+      summary: Get reorder recommendations, optionally scoped to a store
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: List of reorder recommendations
@@ -215,7 +422,18 @@ paths:
     get:
       operationId: getDashboardSummary
       tags: [recommendations]
-      summary: Get dashboard summary stats
+      summary: Get dashboard summary stats, optionally scoped to a store
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: Dashboard summary
@@ -234,10 +452,65 @@ components:
       required:
         - status
 
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - createdAt
+
+    CreateOrganizationBody:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    Store:
+      type: object
+      properties:
+        id:
+          type: integer
+        organizationId:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - organizationId
+        - name
+        - createdAt
+
+    CreateStoreBody:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+      required:
+        - name
+
     InventoryItem:
       type: object
       properties:
         id:
+          type: integer
+        storeId:
           type: integer
         name:
           type: string
@@ -260,6 +533,8 @@ components:
     CreateInventoryItemBody:
       type: object
       properties:
+        storeId:
+          type: integer
         name:
           type: string
         stock:
@@ -290,6 +565,8 @@ components:
       properties:
         id:
           type: integer
+        storeId:
+          type: integer
         menuItem:
           type: string
         quantity:
@@ -306,6 +583,8 @@ components:
     CreateSaleBody:
       type: object
       properties:
+        storeId:
+          type: integer
         menuItem:
           type: string
         quantity:
@@ -336,6 +615,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RecipeIngredient"
+        organizationId:
+          type: integer
+        storeId:
+          type: integer
+        isCompanyRecipe:
+          type: boolean
         createdAt:
           type: string
           format: date-time
@@ -343,6 +628,7 @@ components:
         - id
         - menuItem
         - ingredients
+        - isCompanyRecipe
         - createdAt
 
     CreateRecipeBody:
@@ -354,6 +640,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RecipeIngredient"
+        storeId:
+          type: integer
       required:
         - menuItem
         - ingredients

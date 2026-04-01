@@ -19,7 +19,7 @@ import {
   DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Search, Trash2, ChefHat, X } from "lucide-react";
+import { Loader2, Plus, Search, Trash2, ChefHat, X, Store as StoreIcon, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useStore } from "@/hooks/use-store";
 
 const recipeSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
@@ -55,14 +56,27 @@ export default function Recipes() {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { selectedStore, selectedOrganization } = useStore();
 
-  const { data: recipes, isLoading: isLoadingRecipes } = useListRecipes({
-    query: { queryKey: getListRecipesQueryKey() }
-  });
+  const { data: recipes, isLoading: isLoadingRecipes } = useListRecipes(
+    { storeId: selectedStore?.id, organizationId: selectedOrganization?.id },
+    {
+      query: { 
+        queryKey: getListRecipesQueryKey({ storeId: selectedStore?.id, organizationId: selectedOrganization?.id }),
+        enabled: !!selectedStore
+      }
+    }
+  );
 
-  const { data: inventory } = useListInventory({
-    query: { queryKey: getListInventoryQueryKey() }
-  });
+  const { data: inventory } = useListInventory(
+    { storeId: selectedStore?.id },
+    {
+      query: { 
+        queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }),
+        enabled: !!selectedStore
+      }
+    }
+  );
 
   const createRecipe = useCreateRecipe();
   const deleteRecipe = useDeleteRecipe();
@@ -82,10 +96,10 @@ export default function Recipes() {
 
   const onSubmit = (values: z.infer<typeof recipeSchema>) => {
     createRecipe.mutate(
-      { data: values },
+      { data: { ...values, storeId: selectedStore?.id } },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListRecipesQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListRecipesQueryKey({ storeId: selectedStore?.id, organizationId: selectedOrganization?.id }) });
           toast({ title: "Recipe created successfully" });
           setIsAddOpen(false);
           form.reset({
@@ -105,7 +119,7 @@ export default function Recipes() {
       { id },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListRecipesQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListRecipesQueryKey({ storeId: selectedStore?.id, organizationId: selectedOrganization?.id }) });
           toast({ title: "Recipe deleted" });
         },
         onError: () => {
@@ -114,6 +128,18 @@ export default function Recipes() {
       }
     );
   };
+
+  if (!selectedStore) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <StoreIcon className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold">Select a Store</h2>
+        <p className="text-muted-foreground max-w-md">Please select an organization and a store from the sidebar to manage recipes.</p>
+      </div>
+    );
+  }
 
   const filteredRecipes = recipes?.filter(recipe => 
     recipe.menuItem.toLowerCase().includes(searchQuery.toLowerCase())
@@ -124,7 +150,7 @@ export default function Recipes() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Recipes</h1>
-          <p className="text-muted-foreground mt-1">Define ingredients used per menu item.</p>
+          <p className="text-muted-foreground mt-1">Define ingredients used per menu item for {selectedStore.name}.</p>
         </div>
 
         <Dialog open={isAddOpen} onOpenChange={(open) => {
@@ -136,12 +162,12 @@ export default function Recipes() {
           <DialogTrigger asChild>
             <Button className="hover-elevate">
               <Plus className="mr-2 h-4 w-4" />
-              Create Recipe
+              Create Store Recipe
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Recipe</DialogTitle>
+              <DialogTitle>Create New Store Recipe</DialogTitle>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -261,16 +287,25 @@ export default function Recipes() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredRecipes.map((recipe) => (
             <Card key={recipe.id} className="group relative border-border/50 bg-card/50 backdrop-blur hover:shadow-md transition-all duration-200">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive z-10"
-                onClick={() => handleDelete(recipe.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              {!recipe.isCompanyRecipe && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive z-10"
+                  onClick={() => handleDelete(recipe.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
               <CardHeader className="pb-3">
-                <CardTitle className="pr-8">{recipe.menuItem}</CardTitle>
+                <div className="flex items-start justify-between pr-6">
+                  <CardTitle className="pr-2 leading-tight">{recipe.menuItem}</CardTitle>
+                  {recipe.isCompanyRecipe && (
+                    <Badge variant="secondary" className="flex items-center gap-1 text-[10px] shrink-0 whitespace-nowrap">
+                      <Building2 className="h-3 w-3" /> Company
+                    </Badge>
+                  )}
+                </div>
                 <CardDescription>
                   {recipe.ingredients.length} {recipe.ingredients.length === 1 ? 'ingredient' : 'ingredients'}
                 </CardDescription>

@@ -3,14 +3,38 @@
  * Do not edit manually.
  * Api
  * FlowStock API specification
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 export interface HealthStatus {
   status: string;
 }
 
+export interface Organization {
+  id: number;
+  name: string;
+  createdAt: string;
+}
+
+export interface CreateOrganizationBody {
+  name: string;
+}
+
+export interface Store {
+  id: number;
+  organizationId: number;
+  name: string;
+  address?: string;
+  createdAt: string;
+}
+
+export interface CreateStoreBody {
+  name: string;
+  address?: string;
+}
+
 export interface InventoryItem {
   id: number;
+  storeId?: number;
   name: string;
   stock: number;
   unit: string;
@@ -19,6 +43,7 @@ export interface InventoryItem {
 }
 
 export interface CreateInventoryItemBody {
+  storeId?: number;
   name: string;
   stock: number;
   unit: string;
@@ -34,12 +59,14 @@ export interface UpdateInventoryItemBody {
 
 export interface Sale {
   id: number;
+  storeId?: number;
   menuItem: string;
   quantity: number;
   createdAt: string;
 }
 
 export interface CreateSaleBody {
+  storeId?: number;
   menuItem: string;
   quantity: number;
 }
@@ -53,12 +80,16 @@ export interface Recipe {
   id: number;
   menuItem: string;
   ingredients: RecipeIngredient[];
+  organizationId?: number;
+  storeId?: number;
+  isCompanyRecipe: boolean;
   createdAt: string;
 }
 
 export interface CreateRecipeBody {
   menuItem: string;
   ingredients: RecipeIngredient[];
+  storeId?: number;
 }
 
 export interface Recommendation {
@@ -82,3 +113,26 @@ export interface DashboardSummary {
   reorderCount: number;
   topMenuItems: DashboardSummaryTopMenuItemsItem[];
 }
+
+export type ListInventoryParams = {
+  storeId?: number;
+};
+
+export type ListSalesParams = {
+  storeId?: number;
+};
+
+export type ListRecipesParams = {
+  storeId?: number;
+  organizationId?: number;
+};
+
+export type GetRecommendationsParams = {
+  storeId?: number;
+  organizationId?: number;
+};
+
+export type GetDashboardSummaryParams = {
+  storeId?: number;
+  organizationId?: number;
+};

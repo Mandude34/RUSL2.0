@@ -28,7 +28,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Search, Trash2, Edit2, Package } from "lucide-react";
+import { Loader2, Plus, Search, Trash2, Edit2, Package, Store as StoreIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -52,6 +52,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useStore } from "@/hooks/use-store";
 
 const inventorySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -67,10 +68,17 @@ export default function Inventory() {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { selectedStore } = useStore();
 
-  const { data: inventory, isLoading } = useListInventory({
-    query: { queryKey: getListInventoryQueryKey() }
-  });
+  const { data: inventory, isLoading } = useListInventory(
+    { storeId: selectedStore?.id },
+    {
+      query: { 
+        queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }),
+        enabled: !!selectedStore
+      }
+    }
+  );
 
   const createItem = useCreateInventoryItem();
   const updateItem = useUpdateInventoryItem();
@@ -92,7 +100,7 @@ export default function Inventory() {
         { id: editingItem.id, data: values },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }) });
             toast({ title: "Item updated successfully" });
             setIsAddOpen(false);
             setEditingItem(null);
@@ -105,10 +113,10 @@ export default function Inventory() {
       );
     } else {
       createItem.mutate(
-        { data: values },
+        { data: { ...values, storeId: selectedStore?.id } },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }) });
             toast({ title: "Item added successfully" });
             setIsAddOpen(false);
             form.reset();
@@ -126,7 +134,7 @@ export default function Inventory() {
       { id },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }) });
           toast({ title: "Item deleted" });
         },
         onError: () => {
@@ -147,6 +155,18 @@ export default function Inventory() {
     setIsAddOpen(true);
   };
 
+  if (!selectedStore) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <StoreIcon className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold">Select a Store</h2>
+        <p className="text-muted-foreground max-w-md">Please select an organization and a store from the sidebar to manage inventory.</p>
+      </div>
+    );
+  }
+
   const filteredInventory = inventory?.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
@@ -156,7 +176,7 @@ export default function Inventory() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
-          <p className="text-muted-foreground mt-1">Manage your ingredients and stock levels.</p>
+          <p className="text-muted-foreground mt-1">Manage ingredients for {selectedStore.name}.</p>
         </div>
 
         <Dialog open={isAddOpen} onOpenChange={(open) => {

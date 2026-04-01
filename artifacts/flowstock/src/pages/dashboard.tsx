@@ -1,13 +1,32 @@
 import { useGetDashboardSummary, getGetDashboardSummaryQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, Receipt, ChefHat, AlertTriangle, ArrowUpRight, Loader2 } from "lucide-react";
+import { Package, Receipt, ChefHat, AlertTriangle, ArrowUpRight, Loader2, Store as StoreIcon } from "lucide-react";
+import { useStore } from "@/hooks/use-store";
 
 export default function Dashboard() {
-  const { data: summary, isLoading } = useGetDashboardSummary({
-    query: {
-      queryKey: getGetDashboardSummaryQueryKey()
+  const { selectedStore, selectedOrganization } = useStore();
+  
+  const { data: summary, isLoading } = useGetDashboardSummary(
+    { storeId: selectedStore?.id, organizationId: selectedOrganization?.id },
+    {
+      query: {
+        queryKey: getGetDashboardSummaryQueryKey({ storeId: selectedStore?.id, organizationId: selectedOrganization?.id }),
+        enabled: !!selectedStore
+      }
     }
-  });
+  );
+
+  if (!selectedStore) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+        <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+          <StoreIcon className="h-8 w-8" />
+        </div>
+        <h2 className="text-2xl font-bold">Select a Store</h2>
+        <p className="text-muted-foreground max-w-md">Please select an organization and a store from the sidebar to view your dashboard.</p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -32,7 +51,7 @@ export default function Dashboard() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Overview of your kitchen operations.</p>
+        <p className="text-muted-foreground mt-1">Overview of operations for {selectedStore.name}.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

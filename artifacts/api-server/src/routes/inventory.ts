@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { db, inventoryTable } from "@workspace/db";
 import {
   CreateInventoryItemBody,
@@ -7,13 +7,28 @@ import {
   UpdateInventoryItemParams,
   DeleteInventoryItemParams,
   ListInventoryResponse,
+  ListInventoryQueryParams,
   UpdateInventoryItemResponse,
 } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
 router.get("/inventory", async (req, res): Promise<void> => {
-  const items = await db.select().from(inventoryTable).orderBy(inventoryTable.name);
+  const query = ListInventoryQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: query.error.message });
+    return;
+  }
+  const { storeId } = query.data;
+  const items = await db
+    .select()
+    .from(inventoryTable)
+    .where(
+      storeId != null
+        ? eq(inventoryTable.storeId, storeId)
+        : isNull(inventoryTable.storeId)
+    )
+    .orderBy(inventoryTable.name);
   res.json(ListInventoryResponse.parse(items));
 });
 
