@@ -10,61 +10,47 @@ import {
 
 const router: IRouter = Router();
 
+// Since stock is deducted in real-time when sales are logged,
+// recommendations are based on current stock levels vs minStock thresholds.
+// Items without minStock are flagged if stock has reached 0.
+function buildRecommendations(inventory: (typeof inventoryTable.$inferSelect)[]) {
+  const recommendations = [];
+  for (const item of inventory) {
+    if (item.minStock != null && item.stock <= item.minStock) {
+      recommendations.push({
+        ingredientName: item.name,
+        currentStock: item.stock,
+        unit: item.unit,
+        totalUsed: 0,
+        orderAmount: Math.max(0, item.minStock * 2 - item.stock), // suggest restocking to 2x minStock
+      });
+    } else if (item.minStock == null && item.stock <= 0) {
+      recommendations.push({
+        ingredientName: item.name,
+        currentStock: 0,
+        unit: item.unit,
+        totalUsed: 0,
+        orderAmount: 10, // suggest a default reorder quantity
+      });
+    }
+  }
+  return recommendations;
+}
+
 router.get("/recommendations", async (req, res): Promise<void> => {
   const query = GetRecommendationsQueryParams.safeParse(req.query);
   if (!query.success) {
     res.status(400).json({ error: query.error.message });
     return;
   }
-  const { storeId, organizationId } = query.data;
+  const { storeId } = query.data;
 
-  const inventoryWhere = storeId != null ? eq(inventoryTable.storeId, storeId) : isNull(inventoryTable.storeId);
-  const salesWhere = storeId != null ? eq(salesTable.storeId, storeId) : isNull(salesTable.storeId);
-  let recipesWhere;
-  if (storeId != null && organizationId != null) {
-    recipesWhere = or(eq(recipesTable.storeId, storeId), eq(recipesTable.organizationId, organizationId));
-  } else if (storeId != null) {
-    recipesWhere = eq(recipesTable.storeId, storeId);
-  } else if (organizationId != null) {
-    recipesWhere = eq(recipesTable.organizationId, organizationId);
-  } else {
-    recipesWhere = and(isNull(recipesTable.storeId), isNull(recipesTable.organizationId));
-  }
+  const inventoryWhere = storeId != null
+    ? eq(inventoryTable.storeId, storeId)
+    : isNull(inventoryTable.storeId);
 
-  const [inventory, sales, recipes] = await Promise.all([
-    db.select().from(inventoryTable).where(inventoryWhere),
-    db.select().from(salesTable).where(salesWhere),
-    db.select().from(recipesTable).where(recipesWhere),
-  ]);
-
-  const recipeMap = new Map(recipes.map((r) => [r.menuItem.toLowerCase(), r.ingredients]));
-  const usage: Record<string, number> = {};
-  for (const sale of sales) {
-    const ingredients = recipeMap.get(sale.menuItem.toLowerCase());
-    if (ingredients) {
-      for (const ing of ingredients) {
-        usage[ing.ingredientName.toLowerCase()] =
-          (usage[ing.ingredientName.toLowerCase()] || 0) + ing.amountPerServing * sale.quantity;
-      }
-    }
-  }
-
-  const recommendations = [];
-  for (const [ingredientName, totalUsed] of Object.entries(usage)) {
-    const inv = inventory.find((i) => i.name.toLowerCase() === ingredientName);
-    const currentStock = inv ? inv.stock : 0;
-    const orderAmount = totalUsed - currentStock;
-    if (orderAmount > 0) {
-      recommendations.push({
-        ingredientName: inv?.name ?? ingredientName,
-        currentStock,
-        unit: inv?.unit ?? "unit",
-        totalUsed,
-        orderAmount,
-      });
-    }
-  }
-
+  const inventory = await db.select().from(inventoryTable).where(inventoryWhere);
+  const recommendations = buildRecommendations(inventory);
   res.json(GetRecommendationsResponse.parse(recommendations));
 });
 
@@ -76,8 +62,14 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
   }
   const { storeId, organizationId } = query.data;
 
-  const inventoryWhere = storeId != null ? eq(inventoryTable.storeId, storeId) : isNull(inventoryTable.storeId);
-  const salesWhere = storeId != null ? eq(salesTable.storeId, storeId) : isNull(salesTable.storeId);
+  const inventoryWhere = storeId != null
+    ? eq(inventoryTable.storeId, storeId)
+    : isNull(inventoryTable.storeId);
+
+  const salesWhere = storeId != null
+    ? eq(salesTable.storeId, storeId)
+    : isNull(salesTable.storeId);
+
   let recipesWhere;
   if (storeId != null && organizationId != null) {
     recipesWhere = or(eq(recipesTable.storeId, storeId), eq(recipesTable.organizationId, organizationId));
@@ -95,26 +87,11 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
     db.select().from(recipesTable).where(recipesWhere),
   ]);
 
-  const recipeMap = new Map(recipes.map((r) => [r.menuItem.toLowerCase(), r.ingredients]));
-  const lowStockCount = inventory.filter((i) => i.minStock != null && i.stock <= i.minStock).length;
+  const lowStockCount = inventory.filter(
+    (i) => i.minStock != null && i.stock <= i.minStock
+  ).length;
 
-  const usage: Record<string, number> = {};
-  for (const sale of sales) {
-    const ingredients = recipeMap.get(sale.menuItem.toLowerCase());
-    if (ingredients) {
-      for (const ing of ingredients) {
-        usage[ing.ingredientName.toLowerCase()] =
-          (usage[ing.ingredientName.toLowerCase()] || 0) + ing.amountPerServing * sale.quantity;
-      }
-    }
-  }
-
-  let reorderCount = 0;
-  for (const [ingredientName, totalUsed] of Object.entries(usage)) {
-    const inv = inventory.find((i) => i.name.toLowerCase() === ingredientName);
-    const currentStock = inv ? inv.stock : 0;
-    if (totalUsed > currentStock) reorderCount++;
-  }
+  const reorderCount = buildRecommendations(inventory).length;
 
   const menuTotals: Record<string, number> = {};
   for (const sale of sales) {
