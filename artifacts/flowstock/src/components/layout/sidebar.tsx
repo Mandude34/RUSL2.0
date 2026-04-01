@@ -1,14 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Menu, Building2, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Menu, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import { StoreSelector } from "./store-selector";
-import { useClerk, useUser } from "@clerk/react";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Inventory", href: "/inventory", icon: Package },
   { name: "Sales", href: "/sales", icon: Receipt },
   { name: "Recipes", href: "/recipes", icon: ChefHat },
@@ -73,37 +72,6 @@ export function Sidebar() {
           </Link>
         </div>
       </nav>
-      <UserFooter />
-    </div>
-  );
-}
-
-function UserFooter() {
-  const { user } = useUser();
-  const { signOut } = useClerk();
-
-  return (
-    <div className="border-t p-4 flex items-center gap-3">
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 shrink-0">
-        <User className="h-4 w-4 text-primary" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate text-foreground">
-          {user?.firstName || user?.emailAddresses?.[0]?.emailAddress || "User"}
-        </p>
-        <p className="text-xs text-muted-foreground truncate">
-          {user?.emailAddresses?.[0]?.emailAddress}
-        </p>
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="shrink-0 text-muted-foreground hover:text-foreground"
-        onClick={() => signOut({ redirectUrl: window.location.origin + import.meta.env.BASE_URL })}
-        title="Sign out"
-      >
-        <LogOut className="h-4 w-4" />
-      </Button>
     </div>
   );
 }
