@@ -16,6 +16,14 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+### FlowStock (`artifacts/flowstock`)
+Kitchen inventory management web app. Tracks ingredients, sales, recipes, and generates reorder recommendations.
+- React + Vite frontend at `/`
+- Uses `@workspace/api-client-react` generated hooks
+- Pages: Dashboard, Inventory, Sales, Recipes, Recommendations
+
 ## Structure
 
 ```text

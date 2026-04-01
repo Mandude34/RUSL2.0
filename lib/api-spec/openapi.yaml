@@ -1,15 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: FlowStock API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: inventory
+    description: Inventory management
+  - name: sales
+    description: Sales tracking
+  - name: recipes
+    description: Recipe management
+  - name: recommendations
+    description: Reorder recommendations
 paths:
   /healthz:
     get:
@@ -24,6 +31,199 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /inventory:
+    get:
+      operationId: listInventory
+      tags: [inventory]
+      summary: List all inventory items
+      responses:
+        "200":
+          description: List of inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
+    post:
+      operationId: createInventoryItem
+      tags: [inventory]
+      summary: Add inventory item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInventoryItemBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+
+  /inventory/{id}:
+    put:
+      operationId: updateInventoryItem
+      tags: [inventory]
+      summary: Update inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInventoryItemBody"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventoryItem"
+    delete:
+      operationId: deleteInventoryItem
+      tags: [inventory]
+      summary: Delete inventory item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /sales:
+    get:
+      operationId: listSales
+      tags: [sales]
+      summary: List all sales
+      responses:
+        "200":
+          description: List of sales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Sale"
+    post:
+      operationId: createSale
+      tags: [sales]
+      summary: Log a sale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSaleBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sale"
+
+  /sales/{id}:
+    delete:
+      operationId: deleteSale
+      tags: [sales]
+      summary: Delete a sale record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /recipes:
+    get:
+      operationId: listRecipes
+      tags: [recipes]
+      summary: List all recipes
+      responses:
+        "200":
+          description: List of recipes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recipe"
+    post:
+      operationId: createRecipe
+      tags: [recipes]
+      summary: Create a recipe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRecipeBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recipe"
+
+  /recipes/{id}:
+    delete:
+      operationId: deleteRecipe
+      tags: [recipes]
+      summary: Delete a recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [recommendations]
+      summary: Get reorder recommendations based on sales and stock
+      responses:
+        "200":
+          description: List of reorder recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recommendation"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [recommendations]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +234,179 @@ components:
       required:
         - status
 
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        stock:
+          type: number
+        unit:
+          type: string
+        minStock:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - stock
+        - unit
+        - createdAt
+
+    CreateInventoryItemBody:
+      type: object
+      properties:
+        name:
+          type: string
+        stock:
+          type: number
+        unit:
+          type: string
+        minStock:
+          type: number
+      required:
+        - name
+        - stock
+        - unit
+
+    UpdateInventoryItemBody:
+      type: object
+      properties:
+        name:
+          type: string
+        stock:
+          type: number
+        unit:
+          type: string
+        minStock:
+          type: number
+
+    Sale:
+      type: object
+      properties:
+        id:
+          type: integer
+        menuItem:
+          type: string
+        quantity:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - menuItem
+        - quantity
+        - createdAt
+
+    CreateSaleBody:
+      type: object
+      properties:
+        menuItem:
+          type: string
+        quantity:
+          type: number
+      required:
+        - menuItem
+        - quantity
+
+    RecipeIngredient:
+      type: object
+      properties:
+        ingredientName:
+          type: string
+        amountPerServing:
+          type: number
+      required:
+        - ingredientName
+        - amountPerServing
+
+    Recipe:
+      type: object
+      properties:
+        id:
+          type: integer
+        menuItem:
+          type: string
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeIngredient"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - menuItem
+        - ingredients
+        - createdAt
+
+    CreateRecipeBody:
+      type: object
+      properties:
+        menuItem:
+          type: string
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeIngredient"
+      required:
+        - menuItem
+        - ingredients
+
+    Recommendation:
+      type: object
+      properties:
+        ingredientName:
+          type: string
+        currentStock:
+          type: number
+        unit:
+          type: string
+        totalUsed:
+          type: number
+        orderAmount:
+          type: number
+      required:
+        - ingredientName
+        - currentStock
+        - unit
+        - totalUsed
+        - orderAmount
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalInventoryItems:
+          type: integer
+        totalSales:
+          type: integer
+        totalRecipes:
+          type: integer
+        lowStockCount:
+          type: integer
+        reorderCount:
+          type: integer
+        topMenuItems:
+          type: array
+          items:
+            type: object
+            properties:
+              menuItem:
+                type: string
+              totalQty:
+                type: number
+            required:
+              - menuItem
+              - totalQty
+      required:
+        - totalInventoryItems
+        - totalSales
+        - totalRecipes
+        - lowStockCount
+        - reorderCount
+        - topMenuItems

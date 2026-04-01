@@ -1,0 +1,107 @@
+import { Link, useLocation } from "wouter";
+import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Menu } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useState } from "react";
+
+const navigation = [
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Inventory", href: "/inventory", icon: Package },
+  { name: "Sales", href: "/sales", icon: Receipt },
+  { name: "Recipes", href: "/recipes", icon: ChefHat },
+  { name: "Recommendations", href: "/recommendations", icon: TrendingUp },
+];
+
+export function Sidebar() {
+  const [location] = useLocation();
+
+  return (
+    <div className="hidden border-r bg-card/50 lg:block lg:w-64 lg:shrink-0 lg:flex-col backdrop-blur-md">
+      <div className="flex h-16 items-center border-b px-6">
+        <div className="flex items-center gap-2 font-bold tracking-tight text-lg text-primary">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <ChefHat className="h-5 w-5" />
+          </div>
+          FlowStock
+        </div>
+      </div>
+      <nav className="flex flex-1 flex-col gap-1 p-4">
+        {navigation.map((item) => {
+          const isActive = location === item.href;
+          return (
+            <Link key={item.name} href={item.href}>
+              <div
+                className={cn(
+                  "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                )}
+              >
+                <item.icon
+                  className={cn(
+                    "h-4 w-4 shrink-0 transition-transform duration-200",
+                    isActive ? "text-primary" : "text-muted-foreground group-hover:scale-110 group-hover:text-foreground"
+                  )}
+                />
+                {item.name}
+              </div>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
+export function MobileNav() {
+  const [location] = useLocation();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="lg:hidden">
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-64 p-0">
+        <div className="flex h-16 items-center border-b px-6">
+          <div className="flex items-center gap-2 font-bold tracking-tight text-lg text-primary">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <ChefHat className="h-5 w-5" />
+            </div>
+            FlowStock
+          </div>
+        </div>
+        <nav className="flex flex-col gap-1 p-4">
+          {navigation.map((item) => {
+            const isActive = location === item.href;
+            return (
+              <Link key={item.name} href={item.href} onClick={() => setOpen(false)}>
+                <div
+                  className={cn(
+                    "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all",
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  )}
+                >
+                  <item.icon
+                    className={cn(
+                      "h-4 w-4 shrink-0",
+                      isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    )}
+                  />
+                  {item.name}
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+}
