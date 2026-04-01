@@ -2,6 +2,8 @@ import { useState } from "react";
 import { 
   useListSales, 
   getListSalesQueryKey,
+  getListInventoryQueryKey,
+  getGetRecommendationsQueryKey,
   useCreateSale,
   useDeleteSale
 } from "@workspace/api-client-react";
@@ -81,6 +83,8 @@ export default function Sales() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListSalesQueryKey({ storeId: selectedStore?.id }) });
+          queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }) });
+          queryClient.invalidateQueries({ queryKey: getGetRecommendationsQueryKey({ storeId: selectedStore?.id }) });
           toast({ title: "Sale logged successfully" });
           setIsAddOpen(false);
           form.reset();
@@ -98,6 +102,8 @@ export default function Sales() {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListSalesQueryKey({ storeId: selectedStore?.id }) });
+          queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }) });
+          queryClient.invalidateQueries({ queryKey: getGetRecommendationsQueryKey({ storeId: selectedStore?.id }) });
           toast({ title: "Sale deleted" });
         },
         onError: () => {

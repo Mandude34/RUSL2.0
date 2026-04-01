@@ -90,7 +90,7 @@ export default function Inventory() {
       name: "",
       stock: 0,
       unit: "kg",
-      minStock: 0,
+      minStock: undefined,
     },
   });
 
@@ -150,7 +150,7 @@ export default function Inventory() {
       name: item.name,
       stock: item.stock,
       unit: item.unit,
-      minStock: item.minStock || 0,
+      minStock: item.minStock ?? undefined,
     });
     setIsAddOpen(true);
   };
@@ -183,7 +183,7 @@ export default function Inventory() {
           setIsAddOpen(open);
           if (!open) {
             setEditingItem(null);
-            form.reset({ name: "", stock: 0, unit: "kg", minStock: 0 });
+            form.reset({ name: "", stock: 0, unit: "kg", minStock: undefined });
           }
         }}>
           <DialogTrigger asChild>
@@ -244,10 +244,11 @@ export default function Inventory() {
                   name="minStock"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Minimum Stock Alert Level</FormLabel>
+                      <FormLabel>Reorder Alert Threshold</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} />
+                        <Input type="number" step="0.01" placeholder="e.g. 10" {...field} value={field.value ?? ""} />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground">When stock falls to or below this level, it appears in Recommendations. Leave blank to disable.</p>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -302,7 +303,7 @@ export default function Inventory() {
                       <TableCell className="text-muted-foreground">{item.unit}</TableCell>
                       <TableCell className="text-right text-muted-foreground font-mono">{item.minStock || '-'}</TableCell>
                       <TableCell className="text-right">
-                        {item.minStock !== undefined && item.stock <= item.minStock ? (
+                        {item.minStock != null && item.stock <= item.minStock ? (
                           <Badge variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20 shadow-none">Low Stock</Badge>
                         ) : (
                           <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 shadow-none">Optimal</Badge>
