@@ -14,5 +14,6 @@ export interface Recipe {
   organizationId?: number;
   storeId?: number;
   isCompanyRecipe: boolean;
+  menuPrice?: number;
   createdAt: Date;
 }

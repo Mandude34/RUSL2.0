@@ -11,4 +11,5 @@ export interface CreateRecipeBody {
   menuItem: string;
   ingredients: RecipeIngredient[];
   storeId?: number;
+  menuPrice?: number;
 }

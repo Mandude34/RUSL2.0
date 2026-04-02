@@ -13,5 +13,6 @@ export interface InventoryItem {
   stock: number;
   unit: string;
   minStock?: number;
+  costPerUnit?: number;
   createdAt: Date;
 }

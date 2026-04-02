@@ -12,12 +12,15 @@ import Sales from "@/pages/sales";
 import Recommendations from "@/pages/recommendations";
 import AIPredictions from "@/pages/ai-predictions";
 import Analytics from "@/pages/analytics";
+import Recipes from "@/pages/recipes";
 import Organizations from "@/pages/organizations/index";
 import OrganizationDetails from "@/pages/organizations/[id]";
 import { StoreProvider } from "@/hooks/use-store";
 import { LandingPage } from "@/pages/landing";
 import { SignInPage, SignUpPage } from "@/pages/auth";
 import { VeteranBadge } from "@/components/veteran-badge";
+import Waste from "@/pages/waste";
+import FoodCost from "@/pages/food-cost";
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
@@ -111,9 +114,12 @@ function ClerkProviderWithRoutes() {
               <ProtectedRoute path="/dashboard" component={Dashboard} />
               <ProtectedRoute path="/inventory" component={Inventory} />
               <ProtectedRoute path="/sales" component={Sales} />
+              <ProtectedRoute path="/recipes" component={Recipes} />
               <ProtectedRoute path="/recommendations" component={Recommendations} />
               <ProtectedRoute path="/ai-predictions" component={AIPredictions} />
               <ProtectedRoute path="/analytics" component={Analytics} />
+              <ProtectedRoute path="/waste" component={Waste} />
+              <ProtectedRoute path="/food-cost" component={FoodCost} />
               <ProtectedRoute path="/organizations" component={Organizations} />
               <ProtectedRoute path="/organizations/:orgId" component={OrganizationDetails} />
               

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Receipt, TrendingUp, Sparkles, BarChart3, ChefHat, Menu, Building2, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, TrendingUp, Sparkles, BarChart3, ChefHat, Menu, Building2, LogOut, Flame, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -11,7 +11,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Inventory", href: "/inventory", icon: Package },
+  { name: "Recipes", href: "/recipes", icon: ChefHat },
   { name: "Usage", href: "/sales", icon: Receipt },
+  { name: "Waste Tracking", href: "/waste", icon: Flame },
+  { name: "Food Cost", href: "/food-cost", icon: DollarSign },
   { name: "Recommendations", href: "/recommendations", icon: TrendingUp },
   { name: "AI Predictions", href: "/ai-predictions", icon: Sparkles },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },

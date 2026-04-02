@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, jsonb, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { organizationsTable } from "./organizations";
@@ -10,6 +10,7 @@ export const recipesTable = pgTable("recipes", {
   storeId: integer("store_id").references(() => storesTable.id, { onDelete: "cascade" }),
   menuItem: text("menu_item").notNull(),
   ingredients: jsonb("ingredients").notNull().$type<{ ingredientName: string; amountPerServing: number }[]>(),
+  menuPrice: doublePrecision("menu_price"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

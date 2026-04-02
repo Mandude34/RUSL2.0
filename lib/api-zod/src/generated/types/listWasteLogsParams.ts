@@ -6,11 +6,6 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface CreateInventoryItemBody {
+export type ListWasteLogsParams = {
   storeId?: number;
-  name: string;
-  stock: number;
-  unit: string;
-  minStock?: number;
-  costPerUnit?: number;
-}
+};

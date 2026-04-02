@@ -7,6 +7,8 @@ import recipesRouter from "./recipes";
 import recommendationsRouter from "./recommendations";
 import predictionsRouter from "./predictions";
 import analyticsRouter from "./analytics";
+import wasteRouter from "./waste";
+import foodCostRouter from "./food-cost";
 
 const router: IRouter = Router();
 
@@ -18,5 +20,7 @@ router.use(recipesRouter);
 router.use(recommendationsRouter);
 router.use(predictionsRouter);
 router.use(analyticsRouter);
+router.use(wasteRouter);
+router.use(foodCostRouter);
 
 export default router;

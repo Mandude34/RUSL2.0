@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 const saleSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
   quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
+  salePrice: z.coerce.number().min(0).optional(),
 });
 
 type Tab = "log" | "summary";
@@ -75,7 +76,7 @@ export default function Sales() {
 
   const form = useForm<z.infer<typeof saleSchema>>({
     resolver: zodResolver(saleSchema),
-    defaultValues: { menuItem: "", quantity: 1 },
+    defaultValues: { menuItem: "", quantity: 1, salePrice: undefined },
   });
 
   const onSubmit = (values: z.infer<typeof saleSchema>) => {
@@ -201,6 +202,20 @@ export default function Sales() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="salePrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sale Price per Unit ($) <span className="text-muted-foreground font-normal">(optional)</span></FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" placeholder="e.g. 12.99" {...field} value={field.value ?? ""} />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">Used to calculate revenue in Food Cost reports.</p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <DialogFooter>
                   <Button type="submit" disabled={createSale.isPending}>
                     {createSale.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -260,7 +275,9 @@ export default function Sales() {
                     <TableRow className="bg-gray-50 border-b border-border hover:bg-gray-50">
                       <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pl-5 h-9">Date & Time</TableHead>
                       <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Menu Item</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Quantity</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Qty</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Price/Unit</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Revenue</TableHead>
                       <TableHead className="w-[60px] h-9"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -272,6 +289,12 @@ export default function Sales() {
                         </TableCell>
                         <TableCell className="font-medium text-sm py-3">{sale.menuItem}</TableCell>
                         <TableCell className="text-right font-mono font-semibold text-sm py-3">{sale.quantity}</TableCell>
+                        <TableCell className="text-right font-mono text-sm py-3 text-muted-foreground">
+                          {sale.salePrice != null ? `$${sale.salePrice.toFixed(2)}` : <span className="text-muted-foreground/40">—</span>}
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-semibold text-sm py-3">
+                          {sale.salePrice != null ? `$${(sale.salePrice * sale.quantity).toFixed(2)}` : <span className="text-muted-foreground/40">—</span>}
+                        </TableCell>
                         <TableCell className="py-3 pr-4">
                           <Button
                             variant="ghost"

@@ -10,6 +10,7 @@ export const inventoryTable = pgTable("inventory", {
   stock: doublePrecision("stock").notNull().default(0),
   unit: text("unit").notNull(),
   minStock: doublePrecision("min_stock"),
+  costPerUnit: doublePrecision("cost_per_unit"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -3,15 +3,16 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { storesTable } from "./stores";
 
-export const salesTable = pgTable("sales", {
+export const wasteLogsTable = pgTable("waste_logs", {
   id: serial("id").primaryKey(),
   storeId: integer("store_id").references(() => storesTable.id, { onDelete: "cascade" }),
-  menuItem: text("menu_item").notNull(),
+  ingredientName: text("ingredient_name").notNull(),
   quantity: doublePrecision("quantity").notNull(),
-  salePrice: doublePrecision("sale_price"),
+  unit: text("unit").notNull(),
+  reason: text("reason"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const insertSaleSchema = createInsertSchema(salesTable).omit({ id: true, createdAt: true });
-export type InsertSale = z.infer<typeof insertSaleSchema>;
-export type Sale = typeof salesTable.$inferSelect;
+export const insertWasteLogSchema = createInsertSchema(wasteLogsTable).omit({ id: true, createdAt: true });
+export type InsertWasteLog = z.infer<typeof insertWasteLogSchema>;
+export type WasteLog = typeof wasteLogsTable.$inferSelect;

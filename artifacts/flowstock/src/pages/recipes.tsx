@@ -44,6 +44,7 @@ import { useStore } from "@/hooks/use-store";
 
 const recipeSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
+  menuPrice: z.coerce.number().min(0).optional(),
   ingredients: z.array(z.object({
     ingredientName: z.string().min(1, "Ingredient is required"),
     amountPerServing: z.coerce.number().min(0.01, "Amount must be greater than 0")
@@ -85,6 +86,7 @@ export default function Recipes() {
     resolver: zodResolver(recipeSchema),
     defaultValues: {
       menuItem: "",
+      menuPrice: undefined,
       ingredients: [{ ingredientName: "", amountPerServing: 1 }],
     },
   });
@@ -104,6 +106,7 @@ export default function Recipes() {
           setIsAddOpen(false);
           form.reset({
             menuItem: "",
+            menuPrice: undefined,
             ingredients: [{ ingredientName: "", amountPerServing: 1 }],
           });
         },
@@ -171,19 +174,34 @@ export default function Recipes() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="menuItem"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Menu Item Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Classic Cheeseburger" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="menuItem"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Menu Item Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Classic Cheeseburger" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="menuPrice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Menu Price ($) <span className="text-muted-foreground font-normal text-xs">(optional)</span></FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" placeholder="e.g. 14.99" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">

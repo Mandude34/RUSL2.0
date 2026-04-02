@@ -24,22 +24,27 @@ import type {
   CreateRecipeBody,
   CreateSaleBody,
   CreateStoreBody,
+  CreateWasteLogBody,
   DashboardSummary,
+  FoodCostReport,
   GetAIPredictionsParams,
   GetAnalyticsParams,
   GetDashboardSummaryParams,
+  GetFoodCostReportParams,
   GetRecommendationsParams,
   HealthStatus,
   InventoryItem,
   ListInventoryParams,
   ListRecipesParams,
   ListSalesParams,
+  ListWasteLogsParams,
   Organization,
   Recipe,
   Recommendation,
   Sale,
   Store,
   UpdateInventoryItemBody,
+  WasteLog,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -2147,6 +2152,367 @@ export function useGetDashboardSummary<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetDashboardSummaryQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List waste logs, optionally scoped to a store
+ */
+export const getListWasteLogsUrl = (params?: ListWasteLogsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/waste?${stringifiedParams}`
+    : `/api/waste`;
+};
+
+export const listWasteLogs = async (
+  params?: ListWasteLogsParams,
+  options?: RequestInit,
+): Promise<WasteLog[]> => {
+  return customFetch<WasteLog[]>(getListWasteLogsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListWasteLogsQueryKey = (params?: ListWasteLogsParams) => {
+  return [`/api/waste`, ...(params ? [params] : [])] as const;
+};
+
+export const getListWasteLogsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listWasteLogs>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListWasteLogsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listWasteLogs>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListWasteLogsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listWasteLogs>>> = ({
+    signal,
+  }) => listWasteLogs(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listWasteLogs>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListWasteLogsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listWasteLogs>>
+>;
+export type ListWasteLogsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List waste logs, optionally scoped to a store
+ */
+
+export function useListWasteLogs<
+  TData = Awaited<ReturnType<typeof listWasteLogs>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListWasteLogsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listWasteLogs>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListWasteLogsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Log a waste or spoilage event
+ */
+export const getCreateWasteLogUrl = () => {
+  return `/api/waste`;
+};
+
+export const createWasteLog = async (
+  createWasteLogBody: CreateWasteLogBody,
+  options?: RequestInit,
+): Promise<WasteLog> => {
+  return customFetch<WasteLog>(getCreateWasteLogUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createWasteLogBody),
+  });
+};
+
+export const getCreateWasteLogMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createWasteLog>>,
+    TError,
+    { data: BodyType<CreateWasteLogBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createWasteLog>>,
+  TError,
+  { data: BodyType<CreateWasteLogBody> },
+  TContext
+> => {
+  const mutationKey = ["createWasteLog"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createWasteLog>>,
+    { data: BodyType<CreateWasteLogBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createWasteLog(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateWasteLogMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createWasteLog>>
+>;
+export type CreateWasteLogMutationBody = BodyType<CreateWasteLogBody>;
+export type CreateWasteLogMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Log a waste or spoilage event
+ */
+export const useCreateWasteLog = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createWasteLog>>,
+    TError,
+    { data: BodyType<CreateWasteLogBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createWasteLog>>,
+  TError,
+  { data: BodyType<CreateWasteLogBody> },
+  TContext
+> => {
+  return useMutation(getCreateWasteLogMutationOptions(options));
+};
+
+/**
+ * @summary Delete a waste log entry
+ */
+export const getDeleteWasteLogUrl = (id: number) => {
+  return `/api/waste/${id}`;
+};
+
+export const deleteWasteLog = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteWasteLogUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteWasteLogMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteWasteLog>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteWasteLog>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteWasteLog"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteWasteLog>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteWasteLog(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteWasteLogMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteWasteLog>>
+>;
+
+export type DeleteWasteLogMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Delete a waste log entry
+ */
+export const useDeleteWasteLog = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteWasteLog>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteWasteLog>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteWasteLogMutationOptions(options));
+};
+
+/**
+ * @summary Get food cost analysis for recipes in a store
+ */
+export const getGetFoodCostReportUrl = (params?: GetFoodCostReportParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/food-cost?${stringifiedParams}`
+    : `/api/food-cost`;
+};
+
+export const getFoodCostReport = async (
+  params?: GetFoodCostReportParams,
+  options?: RequestInit,
+): Promise<FoodCostReport> => {
+  return customFetch<FoodCostReport>(getGetFoodCostReportUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetFoodCostReportQueryKey = (
+  params?: GetFoodCostReportParams,
+) => {
+  return [`/api/food-cost`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetFoodCostReportQueryOptions = <
+  TData = Awaited<ReturnType<typeof getFoodCostReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetFoodCostReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getFoodCostReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetFoodCostReportQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getFoodCostReport>>
+  > = ({ signal }) => getFoodCostReport(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getFoodCostReport>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetFoodCostReportQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getFoodCostReport>>
+>;
+export type GetFoodCostReportQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get food cost analysis for recipes in a store
+ */
+
+export function useGetFoodCostReport<
+  TData = Awaited<ReturnType<typeof getFoodCostReport>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetFoodCostReportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getFoodCostReport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetFoodCostReportQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

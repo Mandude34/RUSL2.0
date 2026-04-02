@@ -10,4 +10,5 @@ export interface CreateSaleBody {
   storeId?: number;
   menuItem: string;
   quantity: number;
+  salePrice?: number;
 }

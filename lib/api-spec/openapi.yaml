@@ -25,6 +25,10 @@ tags:
     description: AI-powered order predictions
   - name: analytics
     description: Sales and stock analytics
+  - name: waste
+    description: Waste and spoilage tracking
+  - name: foodCost
+    description: Food cost reporting
 paths:
   /healthz:
     get:
@@ -494,6 +498,83 @@ paths:
               schema:
                 $ref: "#/components/schemas/DashboardSummary"
 
+  /waste:
+    get:
+      operationId: listWasteLogs
+      tags: [waste]
+      summary: List waste logs, optionally scoped to a store
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of waste logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WasteLog"
+    post:
+      operationId: createWasteLog
+      tags: [waste]
+      summary: Log a waste or spoilage event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWasteLogBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WasteLog"
+
+  /waste/{id}:
+    delete:
+      operationId: deleteWasteLog
+      tags: [waste]
+      summary: Delete a waste log entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /food-cost:
+    get:
+      operationId: getFoodCostReport
+      tags: [foodCost]
+      summary: Get food cost analysis for recipes in a store
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Food cost report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoodCostReport"
+
 components:
   schemas:
     HealthStatus:
@@ -572,6 +653,8 @@ components:
           type: string
         minStock:
           type: number
+        costPerUnit:
+          type: number
         createdAt:
           type: string
           format: date-time
@@ -595,6 +678,8 @@ components:
           type: string
         minStock:
           type: number
+        costPerUnit:
+          type: number
       required:
         - name
         - stock
@@ -611,6 +696,8 @@ components:
           type: string
         minStock:
           type: number
+        costPerUnit:
+          type: number
 
     Sale:
       type: object
@@ -622,6 +709,8 @@ components:
         menuItem:
           type: string
         quantity:
+          type: number
+        salePrice:
           type: number
         createdAt:
           type: string
@@ -640,6 +729,8 @@ components:
         menuItem:
           type: string
         quantity:
+          type: number
+        salePrice:
           type: number
       required:
         - menuItem
@@ -673,6 +764,8 @@ components:
           type: integer
         isCompanyRecipe:
           type: boolean
+        menuPrice:
+          type: number
         createdAt:
           type: string
           format: date-time
@@ -694,6 +787,8 @@ components:
             $ref: "#/components/schemas/RecipeIngredient"
         storeId:
           type: integer
+        menuPrice:
+          type: number
       required:
         - menuItem
         - ingredients
@@ -874,3 +969,100 @@ components:
         - lowStockCount
         - reorderCount
         - topMenuItems
+
+    WasteLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        storeId:
+          type: integer
+        ingredientName:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        reason:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - ingredientName
+        - quantity
+        - unit
+        - createdAt
+
+    CreateWasteLogBody:
+      type: object
+      properties:
+        storeId:
+          type: integer
+        ingredientName:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        reason:
+          type: string
+      required:
+        - ingredientName
+        - quantity
+        - unit
+
+    FoodCostItem:
+      type: object
+      properties:
+        menuItem:
+          type: string
+        menuPrice:
+          type: number
+        ingredientCost:
+          type: number
+        foodCostPct:
+          type: number
+        ingredients:
+          type: array
+          items:
+            type: object
+            properties:
+              ingredientName:
+                type: string
+              amountPerServing:
+                type: number
+              unit:
+                type: string
+              costPerUnit:
+                type: number
+              lineCost:
+                type: number
+            required:
+              - ingredientName
+              - amountPerServing
+              - unit
+      required:
+        - menuItem
+        - ingredientCost
+        - ingredients
+
+    FoodCostReport:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/FoodCostItem"
+        totalRevenue:
+          type: number
+        totalIngredientCost:
+          type: number
+        avgFoodCostPct:
+          type: number
+      required:
+        - items
+        - totalRevenue
+        - totalIngredientCost
+        - avgFoodCostPct

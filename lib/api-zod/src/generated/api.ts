@@ -94,6 +94,7 @@ export const ListCompanyRecipesResponseItem = zod.object({
   organizationId: zod.number().optional(),
   storeId: zod.number().optional(),
   isCompanyRecipe: zod.boolean(),
+  menuPrice: zod.number().optional(),
   createdAt: zod.coerce.date(),
 });
 export const ListCompanyRecipesResponse = zod.array(
@@ -116,6 +117,7 @@ export const CreateCompanyRecipeBody = zod.object({
     }),
   ),
   storeId: zod.number().optional(),
+  menuPrice: zod.number().optional(),
 });
 
 /**
@@ -140,6 +142,7 @@ export const ListInventoryResponseItem = zod.object({
   stock: zod.number(),
   unit: zod.string(),
   minStock: zod.number().optional(),
+  costPerUnit: zod.number().optional(),
   createdAt: zod.coerce.date(),
 });
 export const ListInventoryResponse = zod.array(ListInventoryResponseItem);
@@ -153,6 +156,7 @@ export const CreateInventoryItemBody = zod.object({
   stock: zod.number(),
   unit: zod.string(),
   minStock: zod.number().optional(),
+  costPerUnit: zod.number().optional(),
 });
 
 /**
@@ -167,6 +171,7 @@ export const UpdateInventoryItemBody = zod.object({
   stock: zod.number().optional(),
   unit: zod.string().optional(),
   minStock: zod.number().optional(),
+  costPerUnit: zod.number().optional(),
 });
 
 export const UpdateInventoryItemResponse = zod.object({
@@ -176,6 +181,7 @@ export const UpdateInventoryItemResponse = zod.object({
   stock: zod.number(),
   unit: zod.string(),
   minStock: zod.number().optional(),
+  costPerUnit: zod.number().optional(),
   createdAt: zod.coerce.date(),
 });
 
@@ -198,6 +204,7 @@ export const ListSalesResponseItem = zod.object({
   storeId: zod.number().optional(),
   menuItem: zod.string(),
   quantity: zod.number(),
+  salePrice: zod.number().optional(),
   createdAt: zod.coerce.date(),
 });
 export const ListSalesResponse = zod.array(ListSalesResponseItem);
@@ -209,6 +216,7 @@ export const CreateSaleBody = zod.object({
   storeId: zod.number().optional(),
   menuItem: zod.string(),
   quantity: zod.number(),
+  salePrice: zod.number().optional(),
 });
 
 /**
@@ -238,6 +246,7 @@ export const ListRecipesResponseItem = zod.object({
   organizationId: zod.number().optional(),
   storeId: zod.number().optional(),
   isCompanyRecipe: zod.boolean(),
+  menuPrice: zod.number().optional(),
   createdAt: zod.coerce.date(),
 });
 export const ListRecipesResponse = zod.array(ListRecipesResponseItem);
@@ -254,6 +263,7 @@ export const CreateRecipeBody = zod.object({
     }),
   ),
   storeId: zod.number().optional(),
+  menuPrice: zod.number().optional(),
 });
 
 /**
@@ -365,4 +375,71 @@ export const GetDashboardSummaryResponse = zod.object({
       totalQty: zod.number(),
     }),
   ),
+});
+
+/**
+ * @summary List waste logs, optionally scoped to a store
+ */
+export const ListWasteLogsQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+});
+
+export const ListWasteLogsResponseItem = zod.object({
+  id: zod.number(),
+  storeId: zod.number().optional(),
+  ingredientName: zod.string(),
+  quantity: zod.number(),
+  unit: zod.string(),
+  reason: zod.string().optional(),
+  createdAt: zod.coerce.date(),
+});
+export const ListWasteLogsResponse = zod.array(ListWasteLogsResponseItem);
+
+/**
+ * @summary Log a waste or spoilage event
+ */
+export const CreateWasteLogBody = zod.object({
+  storeId: zod.number().optional(),
+  ingredientName: zod.string(),
+  quantity: zod.number(),
+  unit: zod.string(),
+  reason: zod.string().optional(),
+});
+
+/**
+ * @summary Delete a waste log entry
+ */
+export const DeleteWasteLogParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Get food cost analysis for recipes in a store
+ */
+export const GetFoodCostReportQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+  organizationId: zod.coerce.number().optional(),
+});
+
+export const GetFoodCostReportResponse = zod.object({
+  items: zod.array(
+    zod.object({
+      menuItem: zod.string(),
+      menuPrice: zod.number().optional(),
+      ingredientCost: zod.number(),
+      foodCostPct: zod.number().optional(),
+      ingredients: zod.array(
+        zod.object({
+          ingredientName: zod.string(),
+          amountPerServing: zod.number(),
+          unit: zod.string(),
+          costPerUnit: zod.number().optional(),
+          lineCost: zod.number().optional(),
+        }),
+      ),
+    }),
+  ),
+  totalRevenue: zod.number(),
+  totalIngredientCost: zod.number(),
+  avgFoodCostPct: zod.number(),
 });

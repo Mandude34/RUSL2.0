@@ -6,11 +6,10 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface CreateInventoryItemBody {
+export interface CreateWasteLogBody {
   storeId?: number;
-  name: string;
-  stock: number;
+  ingredientName: string;
+  quantity: number;
   unit: string;
-  minStock?: number;
-  costPerUnit?: number;
+  reason?: string;
 }

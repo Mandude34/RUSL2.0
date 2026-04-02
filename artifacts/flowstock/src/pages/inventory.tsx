@@ -59,6 +59,7 @@ const inventorySchema = z.object({
   stock: z.coerce.number().min(0, "Stock cannot be negative"),
   unit: z.string().min(1, "Unit is required"),
   minStock: z.coerce.number().min(0).optional(),
+  costPerUnit: z.coerce.number().min(0).optional(),
 });
 
 const stockSchema = z.object({
@@ -92,7 +93,7 @@ export default function Inventory() {
 
   const form = useForm<z.infer<typeof inventorySchema>>({
     resolver: zodResolver(inventorySchema),
-    defaultValues: { name: "", stock: 0, unit: "kg", minStock: undefined },
+    defaultValues: { name: "", stock: 0, unit: "kg", minStock: undefined, costPerUnit: undefined },
   });
 
   const stockForm = useForm<z.infer<typeof stockSchema>>({
@@ -141,6 +142,7 @@ export default function Inventory() {
           stock: values.stock,
           unit: stockItem.unit,
           minStock: stockItem.minStock ?? undefined,
+          costPerUnit: stockItem.costPerUnit ?? undefined,
         }
       },
       {
@@ -171,7 +173,7 @@ export default function Inventory() {
 
   const openEdit = (item: any) => {
     setEditingItem(item);
-    form.reset({ name: item.name, stock: item.stock, unit: item.unit, minStock: item.minStock ?? undefined });
+    form.reset({ name: item.name, stock: item.stock, unit: item.unit, minStock: item.minStock ?? undefined, costPerUnit: item.costPerUnit ?? undefined });
     setIsAddOpen(true);
   };
 
@@ -353,6 +355,20 @@ export default function Inventory() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="costPerUnit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cost Per Unit ($)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" placeholder="e.g. 2.50" {...field} value={field.value ?? ""} />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground">Used to calculate food cost in the Food Cost Report. Leave blank if unknown.</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <DialogFooter>
                     <Button type="submit" disabled={createItem.isPending || updateItem.isPending}>
                       {createItem.isPending || updateItem.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
@@ -392,6 +408,7 @@ export default function Inventory() {
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Current Stock</TableHead>
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Unit</TableHead>
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Min. Threshold</TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Cost/Unit</TableHead>
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center h-9">Status</TableHead>
                     <TableHead className="w-[180px] h-9 text-right pr-4 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</TableHead>
                   </TableRow>
@@ -408,6 +425,9 @@ export default function Inventory() {
                         <TableCell className="text-muted-foreground text-sm py-3">{item.unit}</TableCell>
                         <TableCell className="text-right text-muted-foreground font-mono text-sm py-3">
                           {item.minStock != null ? item.minStock : <span className="text-muted-foreground/40">—</span>}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground font-mono text-sm py-3">
+                          {item.costPerUnit != null ? `$${item.costPerUnit.toFixed(2)}` : <span className="text-muted-foreground/40">—</span>}
                         </TableCell>
                         <TableCell className="text-center py-3">
                           {isLow ? (

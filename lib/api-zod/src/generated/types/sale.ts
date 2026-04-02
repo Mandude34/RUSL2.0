@@ -11,5 +11,6 @@ export interface Sale {
   storeId?: number;
   menuItem: string;
   quantity: number;
+  salePrice?: number;
   createdAt: Date;
 }

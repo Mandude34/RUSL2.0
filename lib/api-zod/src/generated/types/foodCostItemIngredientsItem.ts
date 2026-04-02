@@ -6,10 +6,10 @@
  * OpenAPI spec version: 0.2.0
  */
 
-export interface UpdateInventoryItemBody {
-  name?: string;
-  stock?: number;
-  unit?: string;
-  minStock?: number;
+export type FoodCostItemIngredientsItem = {
+  ingredientName: string;
+  amountPerServing: number;
+  unit: string;
   costPerUnit?: number;
-}
+  lineCost?: number;
+};

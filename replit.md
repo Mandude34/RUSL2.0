@@ -19,10 +19,11 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ## Artifacts
 
 ### FlowStock (`artifacts/flowstock`)
-Kitchen inventory management web app. Tracks ingredients, sales, recipes, and generates reorder recommendations.
+Kitchen inventory management web app. Tracks ingredients, sales, recipes, waste, food costs and generates reorder recommendations.
 - React + Vite frontend at `/`
 - Uses `@workspace/api-client-react` generated hooks
-- Pages: Dashboard, Inventory, Sales, Recipes, Recommendations
+- Pages: Dashboard, Inventory, Recipes, Usage/Sales, Waste Tracking, Food Cost, Recommendations, AI Predictions, Analytics, Organizations
+- PDF export supported on Waste Tracking and Food Cost pages (via jsPDF)
 
 ## Structure
 
@@ -98,6 +99,27 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 ### `lib/api-client-react` (`@workspace/api-client-react`)
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
+
+### Waste Tracking Feature
+- `GET /api/waste?storeId=` — list all waste logs for a store
+- `POST /api/waste` — log a spoilage/waste event (ingredientName, quantity, unit, reason, date)
+- `DELETE /api/waste/:id` — remove a waste log entry
+- DB table: `waste_logs` (id, storeId, ingredientName, quantity, unit, reason, wastedAt, createdAt)
+- Frontend: `/waste` page with stat cards, ingredient breakdown tab, and PDF export
+
+### Food Cost Feature
+- `GET /api/food-cost?storeId=` — returns ingredient costs per recipe, total revenue (from sales with salePrice), total cost, and average food cost %
+- Food cost % color coding: ≤25% green, 26-35% yellow, >35% red
+- Frontend: `/food-cost` page with summary cards, collapsible recipe breakdown, and PDF export
+- Requires recipes to have `menuPrice` set and inventory items to have `costPerUnit` set
+
+### Sales Revenue Tracking
+- `salePrice` field added to sales table (optional, $/unit sold)
+- Usage/Sales page shows Price/Unit and Revenue columns in transaction log
+
+### Inventory Cost Tracking
+- `costPerUnit` field added to inventory items (optional, $/unit)
+- Used by Food Cost reports to calculate ingredient costs
 
 ### Analytics Feature
 - `GET /api/analytics?storeId=&organizationId=` — returns `AnalyticsSummary` with three datasets:

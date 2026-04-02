@@ -39,6 +39,7 @@ export interface InventoryItem {
   stock: number;
   unit: string;
   minStock?: number;
+  costPerUnit?: number;
   createdAt: string;
 }
 
@@ -48,6 +49,7 @@ export interface CreateInventoryItemBody {
   stock: number;
   unit: string;
   minStock?: number;
+  costPerUnit?: number;
 }
 
 export interface UpdateInventoryItemBody {
@@ -55,6 +57,7 @@ export interface UpdateInventoryItemBody {
   stock?: number;
   unit?: string;
   minStock?: number;
+  costPerUnit?: number;
 }
 
 export interface Sale {
@@ -62,6 +65,7 @@ export interface Sale {
   storeId?: number;
   menuItem: string;
   quantity: number;
+  salePrice?: number;
   createdAt: string;
 }
 
@@ -69,6 +73,7 @@ export interface CreateSaleBody {
   storeId?: number;
   menuItem: string;
   quantity: number;
+  salePrice?: number;
 }
 
 export interface RecipeIngredient {
@@ -83,6 +88,7 @@ export interface Recipe {
   organizationId?: number;
   storeId?: number;
   isCompanyRecipe: boolean;
+  menuPrice?: number;
   createdAt: string;
 }
 
@@ -90,6 +96,7 @@ export interface CreateRecipeBody {
   menuItem: string;
   ingredients: RecipeIngredient[];
   storeId?: number;
+  menuPrice?: number;
 }
 
 export interface AIPredictionItem {
@@ -161,6 +168,47 @@ export interface DashboardSummary {
   topMenuItems: DashboardSummaryTopMenuItemsItem[];
 }
 
+export interface WasteLog {
+  id: number;
+  storeId?: number;
+  ingredientName: string;
+  quantity: number;
+  unit: string;
+  reason?: string;
+  createdAt: string;
+}
+
+export interface CreateWasteLogBody {
+  storeId?: number;
+  ingredientName: string;
+  quantity: number;
+  unit: string;
+  reason?: string;
+}
+
+export type FoodCostItemIngredientsItem = {
+  ingredientName: string;
+  amountPerServing: number;
+  unit: string;
+  costPerUnit?: number;
+  lineCost?: number;
+};
+
+export interface FoodCostItem {
+  menuItem: string;
+  menuPrice?: number;
+  ingredientCost: number;
+  foodCostPct?: number;
+  ingredients: FoodCostItemIngredientsItem[];
+}
+
+export interface FoodCostReport {
+  items: FoodCostItem[];
+  totalRevenue: number;
+  totalIngredientCost: number;
+  avgFoodCostPct: number;
+}
+
 export type ListInventoryParams = {
   storeId?: number;
 };
@@ -190,6 +238,15 @@ export type GetRecommendationsParams = {
 };
 
 export type GetDashboardSummaryParams = {
+  storeId?: number;
+  organizationId?: number;
+};
+
+export type ListWasteLogsParams = {
+  storeId?: number;
+};
+
+export type GetFoodCostReportParams = {
   storeId?: number;
   organizationId?: number;
 };
