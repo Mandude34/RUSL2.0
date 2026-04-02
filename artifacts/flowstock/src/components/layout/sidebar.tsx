@@ -17,100 +17,126 @@ const navigation = [
   { name: "AI Predictions", href: "/ai-predictions", icon: Sparkles },
 ];
 
+function NavItem({ item, isActive, onClick }: { item: typeof navigation[0]; isActive: boolean; onClick?: () => void }) {
+  return (
+    <Link href={item.href} onClick={onClick}>
+      <div
+        className={cn(
+          "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 cursor-pointer",
+          isActive
+            ? "bg-[hsl(158,42%,45%)] text-white shadow-sm"
+            : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+        )}
+      >
+        <item.icon
+          className={cn(
+            "h-4 w-4 shrink-0 transition-transform duration-150",
+            isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300 group-hover:scale-105"
+          )}
+        />
+        {item.name}
+      </div>
+    </Link>
+  );
+}
+
 function UserNav() {
   const { user } = useUser();
   const { signOut } = useClerk();
 
   if (!user) return null;
 
-  const initials = user.firstName && user.lastName 
+  const initials = user.firstName && user.lastName
     ? `${user.firstName[0]}${user.lastName[0]}`
     : user.primaryEmailAddress?.emailAddress[0].toUpperCase() || "U";
 
   return (
-    <div className="flex items-center justify-between p-4 border-t border-border/50 bg-card/50">
-      <div className="flex items-center gap-3 overflow-hidden">
-        <Avatar className="h-9 w-9 border border-border shadow-sm">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-800">
+      <div className="flex items-center gap-3 overflow-hidden min-w-0">
+        <Avatar className="h-8 w-8 border border-slate-700 shrink-0">
           <AvatarImage src={user.imageUrl} />
-          <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
+          <AvatarFallback className="bg-[hsl(158,42%,28%)] text-white text-xs font-semibold">{initials}</AvatarFallback>
         </Avatar>
-        <div className="flex flex-col overflow-hidden">
-          <span className="text-sm font-medium truncate text-foreground">{user.fullName || user.primaryEmailAddress?.emailAddress}</span>
-          <span className="text-xs text-muted-foreground truncate">{user.primaryEmailAddress?.emailAddress}</span>
+        <div className="flex flex-col overflow-hidden min-w-0">
+          <span className="text-xs font-semibold truncate text-slate-200">{user.fullName || user.primaryEmailAddress?.emailAddress}</span>
+          <span className="text-[10px] text-slate-500 truncate">{user.primaryEmailAddress?.emailAddress}</span>
         </div>
       </div>
-      <Button variant="ghost" size="icon" onClick={() => signOut()} title="Sign out" className="shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-        <LogOut className="h-4 w-4" />
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => signOut()}
+        title="Sign out"
+        className="shrink-0 h-7 w-7 text-slate-500 hover:text-red-400 hover:bg-slate-800"
+      >
+        <LogOut className="h-3.5 w-3.5" />
       </Button>
     </div>
   );
 }
 
-export function Sidebar() {
+function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const [location] = useLocation();
 
   return (
-    <div className="hidden border-r bg-card/50 lg:flex lg:w-64 lg:shrink-0 lg:flex-col backdrop-blur-md">
-      <div className="flex h-16 shrink-0 items-center border-b px-6">
-        <div className="flex items-center gap-2 font-bold tracking-tight text-lg text-primary">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
-            <ChefHat className="h-5 w-5" />
+    <>
+      <div className="flex h-14 shrink-0 items-center border-b border-slate-800 px-5">
+        <div className="flex items-center gap-2.5 font-bold tracking-tight text-base">
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(158,42%,40%)] shadow-sm">
+            <ChefHat className="h-4 w-4 text-white" />
           </div>
-          FlowStock
+          <span className="text-white">FlowStock</span>
         </div>
       </div>
+
       <StoreSelector />
-      <nav className="flex flex-1 flex-col gap-1 p-4 overflow-y-auto">
+
+      <nav className="flex flex-1 flex-col gap-0.5 p-3 overflow-y-auto">
+        <div className="mb-1 px-2 pt-1 pb-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-600">Menu</span>
+        </div>
         {navigation.map((item) => {
           const isActive = location === item.href || (item.href === "/dashboard" && location === "/");
           return (
-            <Link key={item.name} href={item.href}>
-              <div
-                className={cn(
-                  "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
-                  isActive
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <item.icon
-                  className={cn(
-                    "h-4 w-4 shrink-0 transition-transform duration-200",
-                    isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:scale-110 group-hover:text-foreground"
-                  )}
-                />
-                {item.name}
-              </div>
-            </Link>
+            <NavItem key={item.name} item={item} isActive={isActive} onClick={onNavClick} />
           );
         })}
-        
-        <div className="mt-4 pt-4 border-t border-border/50">
-          <Link href="/organizations">
-            <div
-              className={cn(
-                "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
-                location.startsWith("/organizations")
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              )}
-            >
-              <Building2 className={cn(
-                "h-4 w-4 shrink-0 transition-transform duration-200",
-                location.startsWith("/organizations") ? "text-primary-foreground" : "text-muted-foreground group-hover:scale-110 group-hover:text-foreground"
-              )} />
-              Organizations
-            </div>
-          </Link>
+
+        <div className="mt-4 mb-1 px-2 pt-2 pb-1.5 border-t border-slate-800">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-600">Settings</span>
         </div>
+        <Link href="/organizations" onClick={onNavClick}>
+          <div
+            className={cn(
+              "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 cursor-pointer",
+              location.startsWith("/organizations")
+                ? "bg-[hsl(158,42%,45%)] text-white shadow-sm"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-100"
+            )}
+          >
+            <Building2 className={cn(
+              "h-4 w-4 shrink-0 transition-transform duration-150",
+              location.startsWith("/organizations") ? "text-white" : "text-slate-500 group-hover:text-slate-300 group-hover:scale-105"
+            )} />
+            Organizations
+          </div>
+        </Link>
       </nav>
+
       <UserNav />
+    </>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <div className="hidden bg-slate-900 border-r border-slate-800 lg:flex lg:w-60 lg:shrink-0 lg:flex-col">
+      <SidebarContent />
     </div>
   );
 }
 
 export function MobileNav() {
-  const [location] = useLocation();
   const [open, setOpen] = useState(false);
 
   return (
@@ -121,61 +147,8 @@ export function MobileNav() {
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 p-0 flex flex-col">
-        <div className="flex h-16 shrink-0 items-center border-b px-6">
-          <div className="flex items-center gap-2 font-bold tracking-tight text-lg text-primary">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
-              <ChefHat className="h-5 w-5" />
-            </div>
-            FlowStock
-          </div>
-        </div>
-        <StoreSelector />
-        <nav className="flex flex-1 flex-col gap-1 p-4 overflow-y-auto">
-          {navigation.map((item) => {
-            const isActive = location === item.href || (item.href === "/dashboard" && location === "/");
-            return (
-              <Link key={item.name} href={item.href} onClick={() => setOpen(false)}>
-                <div
-                  className={cn(
-                    "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                  )}
-                >
-                  <item.icon
-                    className={cn(
-                      "h-4 w-4 shrink-0",
-                      isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  />
-                  {item.name}
-                </div>
-              </Link>
-            );
-          })}
-          
-          <div className="mt-4 pt-4 border-t border-border/50">
-            <Link href="/organizations" onClick={() => setOpen(false)}>
-              <div
-                className={cn(
-                  "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all",
-                  location.startsWith("/organizations")
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <Building2 className={cn(
-                  "h-4 w-4 shrink-0",
-                  location.startsWith("/organizations") ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
-                )} />
-                Organizations
-              </div>
-            </Link>
-          </div>
-        </nav>
-        <UserNav />
+      <SheetContent side="left" className="w-60 p-0 flex flex-col bg-slate-900 border-r border-slate-800">
+        <SidebarContent onNavClick={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );

@@ -1,8 +1,7 @@
 import { useStore } from "@/hooks/use-store";
 import { useListOrganizations, getListOrganizationsQueryKey, useListStores, getListStoresQueryKey } from "@workspace/api-client-react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Store as StoreIcon, Building2, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Store as StoreIcon, Building2 } from "lucide-react";
+import { useEffect } from "react";
 
 export function StoreSelector() {
   const { selectedStore, setSelectedStore, selectedOrganization, setSelectedOrganization } = useStore();
@@ -21,65 +20,50 @@ export function StoreSelector() {
     }
   );
 
-  // Auto-select first org if none selected and orgs exist
   useEffect(() => {
-    if (!selectedOrganization && organizations && organizations.length > 0) {
-      // We don't auto-select to avoid confusion, or maybe we do? Let's leave it null until user selects.
-    }
+    // intentionally empty
   }, [organizations, selectedOrganization]);
 
   return (
-    <div className="px-4 py-4 border-b bg-card/50 space-y-3">
+    <div className="px-3 py-3 border-b border-slate-800 space-y-2.5">
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
           <Building2 className="h-3 w-3" /> Organization
         </label>
-        <Select
+        <select
           value={selectedOrganization?.id.toString() || ""}
-          onValueChange={(val) => {
-            const org = organizations?.find(o => o.id.toString() === val);
+          onChange={(e) => {
+            const org = organizations?.find(o => o.id.toString() === e.target.value);
             setSelectedOrganization(org || null);
-            setSelectedStore(null); // Reset store when org changes
+            setSelectedStore(null);
           }}
+          className="w-full h-8 text-sm rounded-md border border-slate-700 bg-slate-800 text-slate-200 px-2 focus:outline-none focus:ring-1 focus:ring-[hsl(158,42%,45%)] cursor-pointer appearance-none"
         >
-          <SelectTrigger className="w-full h-8 text-sm">
-            <SelectValue placeholder={isLoadingOrgs ? "Loading..." : "Select Organization"} />
-          </SelectTrigger>
-          <SelectContent>
-            {organizations?.map(org => (
-              <SelectItem key={org.id} value={org.id.toString()}>{org.name}</SelectItem>
-            ))}
-            {(!organizations || organizations.length === 0) && !isLoadingOrgs && (
-              <SelectItem value="none" disabled>No organizations</SelectItem>
-            )}
-          </SelectContent>
-        </Select>
+          <option value="" disabled>{isLoadingOrgs ? "Loading..." : "Select organization"}</option>
+          {organizations?.map(org => (
+            <option key={org.id} value={org.id.toString()}>{org.name}</option>
+          ))}
+        </select>
       </div>
 
       {selectedOrganization && (
         <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-          <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <StoreIcon className="h-3 w-3" /> Store
+          <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
+            <StoreIcon className="h-3 w-3" /> Location
           </label>
-          <Select
+          <select
             value={selectedStore?.id.toString() || ""}
-            onValueChange={(val) => {
-              const store = stores?.find(s => s.id.toString() === val);
+            onChange={(e) => {
+              const store = stores?.find(s => s.id.toString() === e.target.value);
               setSelectedStore(store || null);
             }}
+            className="w-full h-8 text-sm rounded-md border border-[hsl(158,42%,35%)] bg-[hsl(158,42%,18%)] text-[hsl(158,42%,75%)] px-2 focus:outline-none focus:ring-1 focus:ring-[hsl(158,42%,45%)] cursor-pointer appearance-none font-medium"
           >
-            <SelectTrigger className="w-full h-8 text-sm bg-primary/5 border-primary/20">
-              <SelectValue placeholder={isLoadingStores ? "Loading..." : "Select Store"} />
-            </SelectTrigger>
-            <SelectContent>
-              {stores?.map(store => (
-                <SelectItem key={store.id} value={store.id.toString()}>{store.name}</SelectItem>
-              ))}
-              {(!stores || stores.length === 0) && !isLoadingStores && (
-                <SelectItem value="none" disabled>No stores found</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
+            <option value="" disabled>{isLoadingStores ? "Loading..." : "Select store"}</option>
+            {stores?.map(store => (
+              <option key={store.id} value={store.id.toString()}>{store.name}</option>
+            ))}
+          </select>
         </div>
       )}
     </div>
