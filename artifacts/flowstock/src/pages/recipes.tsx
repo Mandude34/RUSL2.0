@@ -44,10 +44,16 @@ import { useStore } from "@/hooks/use-store";
 
 const recipeSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
-  menuPrice: z.coerce.number().min(0).optional(),
+  menuPrice: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+    z.number().min(0).optional()
+  ),
   ingredients: z.array(z.object({
     ingredientName: z.string().min(1, "Ingredient is required"),
-    amountPerServing: z.coerce.number().min(0.01, "Amount must be greater than 0")
+    amountPerServing: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? undefined : Number(v)),
+      z.number().min(0.01, "Amount must be greater than 0")
+    ),
   })).min(1, "At least one ingredient is required"),
 });
 
@@ -217,8 +223,8 @@ export default function Recipes() {
                     </Button>
                   </div>
                   
-                  {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-end gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
+                  {fields.map((arrayField, index) => (
+                    <div key={arrayField.id} className="flex items-end gap-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                       <FormField
                         control={form.control}
                         name={`ingredients.${index}.ingredientName`}
