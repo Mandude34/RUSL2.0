@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Receipt, TrendingUp, Sparkles, BarChart3, Menu, Building2, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, TrendingUp, Sparkles, BarChart3, ChefHat, Menu, Building2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
