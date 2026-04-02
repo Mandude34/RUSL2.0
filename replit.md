@@ -99,6 +99,12 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### Analytics Feature
+- `GET /api/analytics?storeId=&organizationId=` — returns `AnalyticsSummary` with three datasets:
+  - `salesByItem` — all-time sales grouped by menu item with percentages
+  - `dailySales` — last 30 days of daily sales totals (all days filled, 0 if no sales)
+  - `stockConsumption` — ingredients with estimated usage (sales × recipe amounts), current stock, and variance
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

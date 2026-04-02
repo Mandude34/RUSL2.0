@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Sparkles, Menu, Building2, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Receipt, ChefHat, TrendingUp, Sparkles, BarChart3, Menu, Building2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -15,6 +15,7 @@ const navigation = [
   { name: "Recipes", href: "/recipes", icon: ChefHat },
   { name: "Recommendations", href: "/recommendations", icon: TrendingUp },
   { name: "AI Predictions", href: "/ai-predictions", icon: Sparkles },
+  { name: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
 
 function NavItem({ item, isActive, onClick }: { item: typeof navigation[0]; isActive: boolean; onClick?: () => void }) {

@@ -6,6 +6,7 @@ import salesRouter from "./sales";
 import recipesRouter from "./recipes";
 import recommendationsRouter from "./recommendations";
 import predictionsRouter from "./predictions";
+import analyticsRouter from "./analytics";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(salesRouter);
 router.use(recipesRouter);
 router.use(recommendationsRouter);
 router.use(predictionsRouter);
+router.use(analyticsRouter);
 
 export default router;

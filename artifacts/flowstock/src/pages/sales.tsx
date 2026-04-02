@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   useListSales,
   getListSalesQueryKey,
@@ -40,17 +40,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useStore } from "@/hooks/use-store";
+import { cn } from "@/lib/utils";
 
 const saleSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
   quantity: z.coerce.number().int().min(1, "Quantity must be at least 1"),
 });
 
+type Tab = "log" | "summary";
+
 export default function Sales() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("log");
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -106,6 +110,26 @@ export default function Sales() {
     );
   };
 
+  // Build daily summary: group by date → { menuItem → qty }
+  const dailySummary = useMemo(() => {
+    if (!sales) return [];
+    const map: Record<string, { date: string; items: Record<string, number>; total: number }> = {};
+    for (const sale of sales) {
+      const dateKey = new Date(sale.createdAt).toISOString().split("T")[0];
+      if (!map[dateKey]) map[dateKey] = { date: dateKey, items: {}, total: 0 };
+      map[dateKey].items[sale.menuItem] = (map[dateKey].items[sale.menuItem] || 0) + sale.quantity;
+      map[dateKey].total += sale.quantity;
+    }
+    return Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
+  }, [sales]);
+
+  // All unique menu items (for summary table columns)
+  const allMenuItems = useMemo(() => {
+    if (!sales) return [];
+    const set = new Set(sales.map(s => s.menuItem));
+    return Array.from(set).sort();
+  }, [sales]);
+
   if (!selectedStore) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
@@ -123,6 +147,11 @@ export default function Sales() {
   const filteredSales = sales?.filter(sale =>
     sale.menuItem.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
+
+  const filteredSummary = dailySummary.filter(day =>
+    searchQuery === "" ||
+    Object.keys(day.items).some(item => item.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -184,77 +213,207 @@ export default function Sales() {
         </Dialog>
       </div>
 
-      <Card className="border border-border bg-white shadow-xs">
-        <CardHeader className="pb-3 border-b border-border/60">
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search sales..."
-              className="pl-9 bg-muted/40 border-border/70 h-9 text-sm"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="h-7 w-7 animate-spin text-primary" />
+      {/* Tab bar */}
+      <div className="flex gap-1 border-b border-border">
+        {[
+          { key: "log" as Tab, label: "Transaction Log" },
+          { key: "summary" as Tab, label: "Daily Summary" },
+        ].map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={cn(
+              "px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
+              activeTab === tab.key
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Transaction Log Tab ── */}
+      {activeTab === "log" && (
+        <Card className="border border-border bg-white shadow-xs">
+          <CardHeader className="pb-3 border-b border-border/60">
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search sales..."
+                className="pl-9 bg-muted/40 border-border/70 h-9 text-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          ) : filteredSales.length > 0 ? (
-            <div className="overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 border-b border-border hover:bg-gray-50">
-                    <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pl-5 h-9">Date & Time</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Menu Item</TableHead>
-                    <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Quantity</TableHead>
-                    <TableHead className="w-[60px] h-9"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSales.map((sale) => (
-                    <TableRow key={sale.id} className="group border-b border-border/40 hover:bg-gray-50/80 transition-colors">
-                      <TableCell className="pl-5 py-3 text-muted-foreground text-sm font-mono">
-                        {format(new Date(sale.createdAt), "MMM d, yyyy · HH:mm")}
-                      </TableCell>
-                      <TableCell className="font-medium text-sm py-3">{sale.menuItem}</TableCell>
-                      <TableCell className="text-right font-mono font-semibold text-sm py-3">{sale.quantity}</TableCell>
-                      <TableCell className="py-3 pr-4">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all"
-                          onClick={() => handleDelete(sale.id)}
-                          disabled={deleteSale.isPending}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
-              <div className="rounded-2xl bg-muted/50 p-5 mb-4 border border-border/60">
-                <Receipt className="h-9 w-9 text-muted-foreground/40" />
+          </CardHeader>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
               </div>
-              <h3 className="text-sm font-semibold text-foreground mb-1">No sales recorded</h3>
-              <p className="text-xs max-w-xs">
-                {searchQuery ? "No sales match your search." : "Log your first sale to start tracking what's selling."}
-              </p>
-              {!searchQuery && (
-                <Button onClick={() => setIsAddOpen(true)} className="mt-4" variant="outline" size="sm">
-                  <Plus className="mr-1.5 h-3.5 w-3.5" />
-                  Log Sale
-                </Button>
+            ) : filteredSales.length > 0 ? (
+              <div className="overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 border-b border-border hover:bg-gray-50">
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pl-5 h-9">Date & Time</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Menu Item</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Quantity</TableHead>
+                      <TableHead className="w-[60px] h-9"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSales.map((sale) => (
+                      <TableRow key={sale.id} className="group border-b border-border/40 hover:bg-gray-50/80 transition-colors">
+                        <TableCell className="pl-5 py-3 text-muted-foreground text-sm font-mono">
+                          {format(new Date(sale.createdAt), "MMM d, yyyy · HH:mm")}
+                        </TableCell>
+                        <TableCell className="font-medium text-sm py-3">{sale.menuItem}</TableCell>
+                        <TableCell className="text-right font-mono font-semibold text-sm py-3">{sale.quantity}</TableCell>
+                        <TableCell className="py-3 pr-4">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all"
+                            onClick={() => handleDelete(sale.id)}
+                            disabled={deleteSale.isPending}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
+                <div className="rounded-2xl bg-muted/50 p-5 mb-4 border border-border/60">
+                  <Receipt className="h-9 w-9 text-muted-foreground/40" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground mb-1">No sales recorded</h3>
+                <p className="text-xs max-w-xs">
+                  {searchQuery ? "No sales match your search." : "Log your first sale to start tracking what's selling."}
+                </p>
+                {!searchQuery && (
+                  <Button onClick={() => setIsAddOpen(true)} className="mt-4" variant="outline" size="sm">
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />
+                    Log Sale
+                  </Button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Daily Summary Tab ── */}
+      {activeTab === "summary" && (
+        <Card className="border border-border bg-white shadow-xs">
+          <CardHeader className="pb-3 border-b border-border/60">
+            <div className="flex items-center gap-3">
+              <div className="relative max-w-sm flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Filter by menu item..."
+                  className="pl-9 bg-muted/40 border-border/70 h-9 text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              {!isLoading && (
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {dailySummary.length} {dailySummary.length === 1 ? "day" : "days"} of sales
+                </span>
               )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="flex justify-center py-16">
+                <Loader2 className="h-7 w-7 animate-spin text-primary" />
+              </div>
+            ) : filteredSummary.length > 0 ? (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50 border-b border-border hover:bg-gray-50">
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pl-5 h-9 min-w-[120px]">Date</TableHead>
+                      {allMenuItems.map(item => (
+                        <TableHead key={item} className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9 text-right whitespace-nowrap">
+                          {item}
+                        </TableHead>
+                      ))}
+                      <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9 text-right pr-5 min-w-[80px]">
+                        Total
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSummary.map((day) => {
+                      const displayedItems = searchQuery
+                        ? allMenuItems.filter(item => item.toLowerCase().includes(searchQuery.toLowerCase()))
+                        : allMenuItems;
+                      return (
+                        <TableRow key={day.date} className="border-b border-border/40 hover:bg-gray-50/80 transition-colors">
+                          <TableCell className="pl-5 py-2.5 font-medium text-sm min-w-[120px]">
+                            {(() => { try { return format(parseISO(day.date), "EEE, MMM d"); } catch { return day.date; } })()}
+                          </TableCell>
+                          {allMenuItems.map(item => {
+                            const qty = day.items[item];
+                            const highlighted = searchQuery && item.toLowerCase().includes(searchQuery.toLowerCase());
+                            return (
+                              <TableCell
+                                key={item}
+                                className={cn(
+                                  "text-right font-mono text-sm py-2.5",
+                                  highlighted ? "text-primary font-semibold" : qty ? "text-foreground" : "text-muted-foreground/30"
+                                )}
+                              >
+                                {qty ?? "—"}
+                              </TableCell>
+                            );
+                          })}
+                          <TableCell className="text-right font-mono font-bold text-sm py-2.5 pr-5 text-foreground">
+                            {day.total}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {/* Totals row */}
+                    <TableRow className="bg-gray-50 border-t-2 border-border font-semibold">
+                      <TableCell className="pl-5 py-2.5 text-sm font-bold">All Time</TableCell>
+                      {allMenuItems.map(item => {
+                        const total = dailySummary.reduce((sum, day) => sum + (day.items[item] || 0), 0);
+                        return (
+                          <TableCell key={item} className="text-right font-mono text-sm py-2.5 font-bold">
+                            {total > 0 ? total : "—"}
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell className="text-right font-mono font-bold text-sm py-2.5 pr-5">
+                        {dailySummary.reduce((sum, day) => sum + day.total, 0)}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
+                <div className="rounded-2xl bg-muted/50 p-5 mb-4 border border-border/60">
+                  <Receipt className="h-9 w-9 text-muted-foreground/40" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground mb-1">No daily data</h3>
+                <p className="text-xs max-w-xs">
+                  {searchQuery ? "No days match your search." : "Log sales to see a daily breakdown."}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -8,6 +8,10 @@
 
 export * from "./aIPrediction";
 export * from "./aIPredictionItem";
+export * from "./analyticsDailySale";
+export * from "./analyticsSalesByItem";
+export * from "./analyticsStockConsumption";
+export * from "./analyticsSummary";
 export * from "./createInventoryItemBody";
 export * from "./createOrganizationBody";
 export * from "./createRecipeBody";
@@ -16,6 +20,7 @@ export * from "./createStoreBody";
 export * from "./dashboardSummary";
 export * from "./dashboardSummaryTopMenuItemsItem";
 export * from "./getAIPredictionsParams";
+export * from "./getAnalyticsParams";
 export * from "./getDashboardSummaryParams";
 export * from "./getRecommendationsParams";
 export * from "./healthStatus";

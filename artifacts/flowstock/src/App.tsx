@@ -12,6 +12,7 @@ import Sales from "@/pages/sales";
 import Recipes from "@/pages/recipes";
 import Recommendations from "@/pages/recommendations";
 import AIPredictions from "@/pages/ai-predictions";
+import Analytics from "@/pages/analytics";
 import Organizations from "@/pages/organizations/index";
 import OrganizationDetails from "@/pages/organizations/[id]";
 import { StoreProvider } from "@/hooks/use-store";
@@ -114,6 +115,7 @@ function ClerkProviderWithRoutes() {
               <ProtectedRoute path="/recipes" component={Recipes} />
               <ProtectedRoute path="/recommendations" component={Recommendations} />
               <ProtectedRoute path="/ai-predictions" component={AIPredictions} />
+              <ProtectedRoute path="/analytics" component={Analytics} />
               <ProtectedRoute path="/organizations" component={Organizations} />
               <ProtectedRoute path="/organizations/:orgId" component={OrganizationDetails} />
               

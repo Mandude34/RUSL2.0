@@ -291,6 +291,42 @@ export const GetAIPredictionsResponse = zod.object({
 });
 
 /**
+ * @summary Get sales and stock analytics for a store
+ */
+export const GetAnalyticsQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+  organizationId: zod.coerce.number().optional(),
+});
+
+export const GetAnalyticsResponse = zod.object({
+  salesByItem: zod.array(
+    zod.object({
+      menuItem: zod.string(),
+      totalQty: zod.number(),
+      percentage: zod.number(),
+    }),
+  ),
+  dailySales: zod.array(
+    zod.object({
+      date: zod.string(),
+      totalQty: zod.number(),
+    }),
+  ),
+  stockConsumption: zod.array(
+    zod.object({
+      ingredientName: zod.string(),
+      unit: zod.string(),
+      currentStock: zod.number(),
+      estimatedUsed: zod.number(),
+      minStock: zod.number().nullish(),
+      variance: zod.number(),
+    }),
+  ),
+  totalUnitsSold: zod.number(),
+  totalTransactions: zod.number(),
+});
+
+/**
  * @summary Get reorder recommendations, optionally scoped to a store
  */
 export const GetRecommendationsQueryParams = zod.object({

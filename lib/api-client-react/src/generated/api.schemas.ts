@@ -119,6 +119,34 @@ export interface Recommendation {
   orderAmount: number;
 }
 
+export interface AnalyticsSalesByItem {
+  menuItem: string;
+  totalQty: number;
+  percentage: number;
+}
+
+export interface AnalyticsDailySale {
+  date: string;
+  totalQty: number;
+}
+
+export interface AnalyticsStockConsumption {
+  ingredientName: string;
+  unit: string;
+  currentStock: number;
+  estimatedUsed: number;
+  minStock?: number | null;
+  variance: number;
+}
+
+export interface AnalyticsSummary {
+  salesByItem: AnalyticsSalesByItem[];
+  dailySales: AnalyticsDailySale[];
+  stockConsumption: AnalyticsStockConsumption[];
+  totalUnitsSold: number;
+  totalTransactions: number;
+}
+
 export type DashboardSummaryTopMenuItemsItem = {
   menuItem: string;
   totalQty: number;
@@ -147,6 +175,11 @@ export type ListRecipesParams = {
 };
 
 export type GetAIPredictionsParams = {
+  storeId?: number;
+  organizationId?: number;
+};
+
+export type GetAnalyticsParams = {
   storeId?: number;
   organizationId?: number;
 };
