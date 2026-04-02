@@ -264,6 +264,33 @@ export const DeleteRecipeParams = zod.object({
 });
 
 /**
+ * @summary Get AI-powered order predictions based on sales trends
+ */
+export const GetAIPredictionsQueryParams = zod.object({
+  storeId: zod.coerce.number().optional(),
+  organizationId: zod.coerce.number().optional(),
+});
+
+export const GetAIPredictionsResponse = zod.object({
+  summary: zod.string(),
+  predictedPeriod: zod.string(),
+  confidence: zod.string(),
+  items: zod.array(
+    zod.object({
+      ingredientName: zod.string(),
+      currentStock: zod.number(),
+      unit: zod.string(),
+      predictedUsage: zod.number(),
+      suggestedOrder: zod.number(),
+      trend: zod.string(),
+      insight: zod.string(),
+    }),
+  ),
+  notes: zod.string().optional(),
+  generatedAt: zod.string(),
+});
+
+/**
  * @summary Get reorder recommendations, optionally scoped to a store
  */
 export const GetRecommendationsQueryParams = zod.object({

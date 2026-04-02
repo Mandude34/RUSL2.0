@@ -92,6 +92,25 @@ export interface CreateRecipeBody {
   storeId?: number;
 }
 
+export interface AIPredictionItem {
+  ingredientName: string;
+  currentStock: number;
+  unit: string;
+  predictedUsage: number;
+  suggestedOrder: number;
+  trend: string;
+  insight: string;
+}
+
+export interface AIPrediction {
+  summary: string;
+  predictedPeriod: string;
+  confidence: string;
+  items: AIPredictionItem[];
+  notes?: string;
+  generatedAt: string;
+}
+
 export interface Recommendation {
   ingredientName: string;
   currentStock: number;
@@ -123,6 +142,11 @@ export type ListSalesParams = {
 };
 
 export type ListRecipesParams = {
+  storeId?: number;
+  organizationId?: number;
+};
+
+export type GetAIPredictionsParams = {
   storeId?: number;
   organizationId?: number;
 };

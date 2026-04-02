@@ -17,12 +17,14 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AIPrediction,
   CreateInventoryItemBody,
   CreateOrganizationBody,
   CreateRecipeBody,
   CreateSaleBody,
   CreateStoreBody,
   DashboardSummary,
+  GetAIPredictionsParams,
   GetDashboardSummaryParams,
   GetRecommendationsParams,
   HealthStatus,
@@ -1762,6 +1764,103 @@ export const useDeleteRecipe = <
 > => {
   return useMutation(getDeleteRecipeMutationOptions(options));
 };
+
+/**
+ * @summary Get AI-powered order predictions based on sales trends
+ */
+export const getGetAIPredictionsUrl = (params?: GetAIPredictionsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/predictions?${stringifiedParams}`
+    : `/api/predictions`;
+};
+
+export const getAIPredictions = async (
+  params?: GetAIPredictionsParams,
+  options?: RequestInit,
+): Promise<AIPrediction> => {
+  return customFetch<AIPrediction>(getGetAIPredictionsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAIPredictionsQueryKey = (
+  params?: GetAIPredictionsParams,
+) => {
+  return [`/api/predictions`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetAIPredictionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAIPredictions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetAIPredictionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAIPredictions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAIPredictionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAIPredictions>>
+  > = ({ signal }) => getAIPredictions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAIPredictions>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAIPredictionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAIPredictions>>
+>;
+export type GetAIPredictionsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get AI-powered order predictions based on sales trends
+ */
+
+export function useGetAIPredictions<
+  TData = Awaited<ReturnType<typeof getAIPredictions>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetAIPredictionsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAIPredictions>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAIPredictionsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get reorder recommendations, optionally scoped to a store

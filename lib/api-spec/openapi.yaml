@@ -21,6 +21,8 @@ tags:
     description: Recipe management
   - name: recommendations
     description: Reorder recommendations
+  - name: predictions
+    description: AI-powered order predictions
 paths:
   /healthz:
     get:
@@ -392,6 +394,30 @@ paths:
         "204":
           description: Deleted
 
+  /predictions:
+    get:
+      operationId: getAIPredictions
+      tags: [predictions]
+      summary: Get AI-powered order predictions based on sales trends
+      parameters:
+        - name: storeId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: AI-powered predictions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIPrediction"
+
   /recommendations:
     get:
       operationId: getRecommendations
@@ -645,6 +671,56 @@ components:
       required:
         - menuItem
         - ingredients
+
+    AIPredictionItem:
+      type: object
+      properties:
+        ingredientName:
+          type: string
+        currentStock:
+          type: number
+        unit:
+          type: string
+        predictedUsage:
+          type: number
+        suggestedOrder:
+          type: number
+        trend:
+          type: string
+        insight:
+          type: string
+      required:
+        - ingredientName
+        - currentStock
+        - unit
+        - predictedUsage
+        - suggestedOrder
+        - trend
+        - insight
+
+    AIPrediction:
+      type: object
+      properties:
+        summary:
+          type: string
+        predictedPeriod:
+          type: string
+        confidence:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AIPredictionItem"
+        notes:
+          type: string
+        generatedAt:
+          type: string
+      required:
+        - summary
+        - predictedPeriod
+        - confidence
+        - items
+        - generatedAt
 
     Recommendation:
       type: object
