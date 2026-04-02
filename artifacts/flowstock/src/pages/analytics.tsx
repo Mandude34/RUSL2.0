@@ -13,10 +13,23 @@ import { format, parseISO } from "date-fns";
 const PIE_COLORS = ["#10b981", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#84cc16", "#f97316"];
 
 const TABS = [
-  { key: "sales", label: "Sales Breakdown" },
+  { key: "sales", label: "Usage" },
   { key: "stock", label: "Stock Consumption" },
   { key: "daily", label: "Daily Trend" },
 ];
+
+function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percentage }: any) {
+  if (percentage < 5) return null;
+  const RADIAN = Math.PI / 180;
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.55;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  return (
+    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700}>
+      {`${percentage}%`}
+    </text>
+  );
+}
 
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -183,6 +196,8 @@ export default function Analytics() {
                           innerRadius={55}
                           paddingAngle={2}
                           strokeWidth={0}
+                          label={PieLabel}
+                          labelLine={false}
                         >
                           {data.salesByItem.map((_, i) => (
                             <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
