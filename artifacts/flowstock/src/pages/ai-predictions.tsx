@@ -115,7 +115,7 @@ export default function AIPredictions() {
       </div>
 
       {!hasRequested && !isLoading && (
-        <Card className="border border-border bg-white shadow-xs border-dashed">
+        <Card className="border border-border bg-card shadow-xs border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-20 text-center gap-6">
             <div className="relative">
               <div className="h-20 w-20 rounded-2xl bg-primary/8 border border-primary/20 flex items-center justify-center">
@@ -154,7 +154,7 @@ export default function AIPredictions() {
       )}
 
       {isLoading && (
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardContent className="flex flex-col items-center justify-center py-20 gap-5">
             <div className="relative h-16 w-16">
               <div className="absolute inset-0 rounded-full bg-primary/15 animate-ping" />
@@ -188,7 +188,7 @@ export default function AIPredictions() {
       {prediction && !isLoading && (
         <div className="space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-400">
           <div className="grid gap-4 sm:grid-cols-3">
-            <Card className="border border-border bg-white shadow-xs sm:col-span-2">
+            <Card className="border border-border bg-card shadow-xs sm:col-span-2">
               <CardHeader className="border-b border-border/60 pb-3 pt-4 px-5">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -227,7 +227,7 @@ export default function AIPredictions() {
                   ),
                 },
               ].map((card) => (
-                <Card key={card.label} className="border border-border bg-white shadow-xs">
+                <Card key={card.label} className="border border-border bg-card shadow-xs">
                   <CardContent className="px-4 py-3">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
                       <card.icon className="h-3.5 w-3.5" />
@@ -240,7 +240,7 @@ export default function AIPredictions() {
             </div>
           </div>
 
-          <Card className="border border-border bg-white shadow-xs">
+          <Card className="border border-border bg-card shadow-xs">
             <CardHeader className="border-b border-border/60 pb-3 pt-4 px-5">
               <CardTitle className="flex items-center gap-2 text-base font-semibold">
                 <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">

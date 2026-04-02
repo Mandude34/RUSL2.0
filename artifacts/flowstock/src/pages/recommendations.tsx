@@ -47,7 +47,7 @@ export default function Recommendations() {
         <p className="text-sm text-muted-foreground mt-0.5">{selectedStore.name}</p>
       </div>
 
-      <Card className="border border-border bg-white shadow-xs">
+      <Card className="border border-border bg-card shadow-xs">
         <CardHeader className="border-b border-border/60 pb-4">
           <CardTitle className="flex items-center gap-2 text-base font-semibold">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">

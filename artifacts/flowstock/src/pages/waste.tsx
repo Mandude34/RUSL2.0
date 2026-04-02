@@ -314,19 +314,19 @@ export default function Waste() {
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-1">Total Entries</p>
             <p className="text-2xl font-bold">{wasteLogs?.length ?? 0}</p>
           </CardContent>
         </Card>
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-1">Ingredients Wasted</p>
             <p className="text-2xl font-bold">{ingredientSummary.length}</p>
           </CardContent>
         </Card>
-        <Card className="border border-border bg-white shadow-xs col-span-2 sm:col-span-1">
+        <Card className="border border-border bg-card shadow-xs col-span-2 sm:col-span-1">
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold mb-1">Most Wasted</p>
             <p className="text-xl font-bold truncate">{ingredientSummary[0]?.ingredientName ?? "—"}</p>
@@ -356,7 +356,7 @@ export default function Waste() {
       </div>
 
       {activeTab === "log" && (
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardHeader className="pb-3 border-b border-border/60">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -436,7 +436,7 @@ export default function Waste() {
       )}
 
       {activeTab === "summary" && (
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardHeader className="pb-3 border-b border-border/60">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

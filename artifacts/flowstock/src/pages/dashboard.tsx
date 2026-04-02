@@ -129,7 +129,7 @@ export default function Dashboard() {
           <Card
             key={stat.key}
             className={cn(
-              "border border-border bg-white shadow-xs overflow-hidden border-l-4 transition-all duration-200 hover:shadow-md hover:-translate-y-px",
+              "border border-border bg-card shadow-xs overflow-hidden border-l-4 transition-all duration-200 hover:shadow-md hover:-translate-y-px",
               stat.accent
             )}
           >
@@ -150,7 +150,7 @@ export default function Dashboard() {
 
       <div className="grid gap-5 lg:grid-cols-7">
         {/* Top menu items */}
-        <Card className="lg:col-span-4 border border-border bg-white shadow-xs">
+        <Card className="lg:col-span-4 border border-border bg-card shadow-xs">
           <CardHeader className="border-b border-border/60 pb-3 pt-5 px-5">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Receipt className="h-4 w-4 text-muted-foreground" />
@@ -191,7 +191,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Alerts panel */}
-        <Card className="lg:col-span-3 border border-border bg-white shadow-xs overflow-hidden">
+        <Card className="lg:col-span-3 border border-border bg-card shadow-xs overflow-hidden">
           <CardHeader className="border-b border-border/60 pb-3 pt-5 px-5">
             <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               <Bell className="h-4 w-4 text-muted-foreground" />

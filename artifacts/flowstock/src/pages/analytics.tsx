@@ -34,7 +34,7 @@ function PieLabel({ cx, cy, midAngle, innerRadius, outerRadius, percentage }: an
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-border bg-white shadow-md px-3 py-2 text-xs">
+    <div className="rounded-lg border border-border bg-card shadow-md px-3 py-2 text-xs">
       {label && <p className="font-semibold text-foreground mb-1">{label}</p>}
       {payload.map((p: any, i: number) => (
         <p key={i} style={{ color: p.color ?? p.fill }} className="font-medium">
@@ -49,7 +49,7 @@ function PieTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const item = payload[0];
   return (
-    <div className="rounded-lg border border-border bg-white shadow-md px-3 py-2 text-xs">
+    <div className="rounded-lg border border-border bg-card shadow-md px-3 py-2 text-xs">
       <p className="font-semibold text-foreground">{item.name}</p>
       <p className="text-muted-foreground">{item.value.toLocaleString()} units · {item.payload.percentage}%</p>
     </div>
@@ -128,7 +128,7 @@ export default function Analytics() {
             iconBg: "bg-red-50", iconColor: "text-red-600",
           },
         ].map((stat) => (
-          <Card key={stat.label} className={cn("border border-border bg-white shadow-xs border-l-4 overflow-hidden", stat.accent)}>
+          <Card key={stat.label} className={cn("border border-border bg-card shadow-xs border-l-4 overflow-hidden", stat.accent)}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4 px-4">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{stat.label}</p>
               <div className={cn("flex h-7 w-7 items-center justify-center rounded-md", stat.iconBg)}>
@@ -172,7 +172,7 @@ export default function Analytics() {
           {activeTab === "sales" && (
             <div className="grid gap-5 lg:grid-cols-2">
               {/* Pie chart */}
-              <Card className="border border-border bg-white shadow-xs">
+              <Card className="border border-border bg-card shadow-xs">
                 <CardHeader className="border-b border-border/60 pb-3 pt-4 px-5">
                   <CardTitle className="text-sm font-semibold">Sales by Menu Item</CardTitle>
                   <CardDescription className="text-xs">All-time distribution of units sold</CardDescription>
@@ -216,7 +216,7 @@ export default function Analytics() {
               </Card>
 
               {/* Sales table */}
-              <Card className="border border-border bg-white shadow-xs">
+              <Card className="border border-border bg-card shadow-xs">
                 <CardHeader className="border-b border-border/60 pb-3 pt-4 px-5">
                   <CardTitle className="text-sm font-semibold">Sales Rankings</CardTitle>
                   <CardDescription className="text-xs">Ranked by total units sold</CardDescription>
@@ -265,7 +265,7 @@ export default function Analytics() {
           {/* ── Stock Consumption Tab ── */}
           {activeTab === "stock" && (
             <div className="space-y-5">
-              <Card className="border border-border bg-white shadow-xs">
+              <Card className="border border-border bg-card shadow-xs">
                 <CardHeader className="border-b border-border/60 pb-3 pt-4 px-5">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <Package className="h-4 w-4 text-primary" />
@@ -353,7 +353,7 @@ export default function Analytics() {
 
           {/* ── Daily Trend Tab ── */}
           {activeTab === "daily" && (
-            <Card className="border border-border bg-white shadow-xs">
+            <Card className="border border-border bg-card shadow-xs">
               <CardHeader className="border-b border-border/60 pb-3 pt-4 px-5">
                 <CardTitle className="text-sm font-semibold">Daily Sales — Last 30 Days</CardTitle>
                 <CardDescription className="text-xs">Total units sold per day across all menu items</CardDescription>
@@ -389,7 +389,7 @@ export default function Analytics() {
                         content={({ active, payload, label }) => {
                           if (!active || !payload?.length) return null;
                           return (
-                            <div className="rounded-lg border border-border bg-white shadow-md px-3 py-2 text-xs">
+                            <div className="rounded-lg border border-border bg-card shadow-md px-3 py-2 text-xs">
                               <p className="font-semibold text-foreground mb-0.5">
                                 {(() => { try { return format(parseISO(label), "EEE, MMM d"); } catch { return label; } })()}
                               </p>

@@ -20,7 +20,7 @@ router.get("/inventory", async (req, res): Promise<void> => {
     return;
   }
   const { storeId } = query.data;
-  const items = await db
+  const rows = await db
     .select()
     .from(inventoryTable)
     .where(
@@ -29,6 +29,11 @@ router.get("/inventory", async (req, res): Promise<void> => {
         : isNull(inventoryTable.storeId)
     )
     .orderBy(inventoryTable.name);
+  const items = rows.map((r) => ({
+    ...r,
+    costPerUnit: r.costPerUnit ?? undefined,
+    minStock: r.minStock ?? undefined,
+  }));
   res.json(ListInventoryResponse.parse(items));
 });
 
@@ -62,7 +67,11 @@ router.put("/inventory/:id", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Item not found" });
     return;
   }
-  res.json(UpdateInventoryItemResponse.parse(item));
+  res.json(UpdateInventoryItemResponse.parse({
+    ...item,
+    costPerUnit: item.costPerUnit ?? undefined,
+    minStock: item.minStock ?? undefined,
+  }));
 });
 
 router.delete("/inventory/:id", async (req, res): Promise<void> => {

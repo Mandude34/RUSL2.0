@@ -69,24 +69,24 @@
 
 :root {
   /* Cool grey base — professional SaaS look */
-  --background: 220 16% 96%;
+  --background: 220 18% 94%;
   --foreground: 222 30% 10%;
-  --border: 220 14% 87%;
-  --card: 0 0% 100%;
+  --border: 220 14% 83%;
+  --card: 220 13% 98%;
   --card-foreground: 222 30% 10%;
-  --card-border: 220 14% 87%;
+  --card-border: 220 14% 84%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 222 30% 10%;
-  --popover-border: 220 14% 87%;
+  --popover-border: 220 14% 84%;
 
   --primary: 158 42% 32%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 220 14% 92%;
+  --secondary: 220 14% 90%;
   --secondary-foreground: 222 20% 20%;
 
-  --muted: 220 14% 92%;
-  --muted-foreground: 220 10% 48%;
+  --muted: 220 14% 90%;
+  --muted-foreground: 220 10% 46%;
 
   --accent: 158 22% 88%;
   --accent-foreground: 158 42% 26%;

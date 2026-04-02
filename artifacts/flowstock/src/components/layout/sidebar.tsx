@@ -7,6 +7,7 @@ import { useState } from "react";
 import { StoreSelector } from "./store-selector";
 import { useUser, useClerk } from "@clerk/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FlowStockIcon } from "@/components/logo";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -85,8 +86,8 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     <>
       <div className="flex h-14 shrink-0 items-center border-b border-slate-800 px-5">
         <div className="flex items-center gap-2.5 font-bold tracking-tight text-base">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(158,42%,40%)] shadow-sm">
-            <ChefHat className="h-4 w-4 text-white" />
+          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(158,42%,38%)] shadow-sm shadow-black/20">
+            <FlowStockIcon className="h-4 w-4 text-white" />
           </div>
           <span className="text-white">FlowStock</span>
         </div>

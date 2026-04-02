@@ -169,7 +169,7 @@ export default function FoodCost() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <Card className="border border-border bg-white shadow-xs">
+            <Card className="border border-border bg-card shadow-xs">
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="h-9 w-9 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center shrink-0">
                   <DollarSign className="h-4 w-4 text-green-600" />
@@ -180,7 +180,7 @@ export default function FoodCost() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border border-border bg-white shadow-xs">
+            <Card className="border border-border bg-card shadow-xs">
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="h-9 w-9 rounded-lg bg-orange-50 border border-orange-200 flex items-center justify-center shrink-0">
                   <TrendingDown className="h-4 w-4 text-orange-600" />
@@ -191,7 +191,7 @@ export default function FoodCost() {
                 </div>
               </CardContent>
             </Card>
-            <Card className="border border-border bg-white shadow-xs">
+            <Card className="border border-border bg-card shadow-xs">
               <CardContent className="p-4 flex items-center gap-3">
                 <div className={cn(
                   "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border",
@@ -221,7 +221,7 @@ export default function FoodCost() {
           </div>
 
           {/* Recipe Breakdown */}
-          <Card className="border border-border bg-white shadow-xs">
+          <Card className="border border-border bg-card shadow-xs">
             <CardHeader className="pb-3 border-b border-border/60">
               <CardTitle className="text-sm font-semibold">Recipe Breakdown</CardTitle>
             </CardHeader>

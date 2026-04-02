@@ -382,7 +382,7 @@ export default function Inventory() {
         </div>
       </div>
 
-      <Card className="border border-border bg-white shadow-xs">
+      <Card className="border border-border bg-card shadow-xs">
         <CardHeader className="pb-3 border-b border-border/60">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

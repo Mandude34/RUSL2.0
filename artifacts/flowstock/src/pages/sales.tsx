@@ -251,7 +251,7 @@ export default function Sales() {
 
       {/* ── Transaction Log Tab ── */}
       {activeTab === "log" && (
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardHeader className="pb-3 border-b border-border/60">
             <div className="relative max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -334,7 +334,7 @@ export default function Sales() {
 
       {/* ── Daily Summary Tab ── */}
       {activeTab === "summary" && (
-        <Card className="border border-border bg-white shadow-xs">
+        <Card className="border border-border bg-card shadow-xs">
           <CardHeader className="pb-3 border-b border-border/60">
             <div className="flex items-center gap-3">
               <div className="relative max-w-sm flex-1">
