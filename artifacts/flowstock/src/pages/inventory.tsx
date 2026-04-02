@@ -393,7 +393,7 @@ export default function Inventory() {
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Unit</TableHead>
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9">Min. Threshold</TableHead>
                     <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-center h-9">Status</TableHead>
-                    <TableHead className="w-[120px] h-9"></TableHead>
+                    <TableHead className="w-[180px] h-9 text-right pr-4 text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -416,30 +416,30 @@ export default function Inventory() {
                             <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-none text-xs font-semibold">Optimal</Badge>
                           )}
                         </TableCell>
-                        <TableCell className="py-3 pr-4">
-                          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <TableCell className="py-2 pr-4">
+                          <div className="flex justify-end items-center gap-1">
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-blue-600 hover:bg-blue-50"
-                              title="Update stock"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-blue-700 border-blue-200 bg-blue-50 hover:bg-blue-100 gap-1"
                               onClick={() => openStockEdit(item)}
                             >
-                              <Boxes className="h-3.5 w-3.5" />
+                              <Boxes className="h-3 w-3" />
+                              Stock
                             </Button>
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                              title="Edit ingredient"
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 text-xs text-muted-foreground border-border hover:bg-muted gap-1"
                               onClick={() => openEdit(item)}
                             >
-                              <Edit2 className="h-3.5 w-3.5" />
+                              <Edit2 className="h-3 w-3" />
+                              Edit
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title="Delete">
-                                  <Trash2 className="h-3.5 w-3.5" />
+                                <Button variant="outline" size="sm" className="h-7 px-2 text-xs text-destructive border-red-200 bg-red-50 hover:bg-red-100 gap-1">
+                                  <Trash2 className="h-3 w-3" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
