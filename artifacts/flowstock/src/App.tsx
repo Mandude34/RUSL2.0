@@ -9,7 +9,6 @@ import { Shell } from "@/components/layout/shell";
 import Dashboard from "@/pages/dashboard";
 import Inventory from "@/pages/inventory";
 import Sales from "@/pages/sales";
-import Recipes from "@/pages/recipes";
 import Recommendations from "@/pages/recommendations";
 import AIPredictions from "@/pages/ai-predictions";
 import Analytics from "@/pages/analytics";
@@ -112,7 +111,6 @@ function ClerkProviderWithRoutes() {
               <ProtectedRoute path="/dashboard" component={Dashboard} />
               <ProtectedRoute path="/inventory" component={Inventory} />
               <ProtectedRoute path="/sales" component={Sales} />
-              <ProtectedRoute path="/recipes" component={Recipes} />
               <ProtectedRoute path="/recommendations" component={Recommendations} />
               <ProtectedRoute path="/ai-predictions" component={AIPredictions} />
               <ProtectedRoute path="/analytics" component={Analytics} />
