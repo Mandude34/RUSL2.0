@@ -88,7 +88,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(158,42%,38%)] shadow-sm shadow-black/20">
             <FlowStockIcon className="h-4 w-4 text-white" />
           </div>
-          <span className="text-white">FlowStock</span>
+          <span className="text-white">sToK</span>
         </div>
       </div>
 

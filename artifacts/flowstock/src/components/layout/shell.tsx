@@ -14,7 +14,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
                 <FlowStockIcon className="h-3.5 w-3.5" />
               </div>
-              FlowStock
+              sToK
             </div>
           </div>
         </header>
