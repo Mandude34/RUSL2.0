@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import {
   useListSales,
   getListSalesQueryKey,
@@ -27,7 +27,21 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Loader2, Plus, Search, Trash2, Receipt, Store as StoreIcon } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Search,
+  Trash2,
+  Receipt,
+  Store as StoreIcon,
+  FileUp,
+  CheckCircle2,
+  XCircle,
+  FileText,
+  UploadCloud,
+  Pencil,
+  Check
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -43,6 +57,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { useStore } from "@/hooks/use-store";
 import { cn } from "@/lib/utils";
+import { useApiUrl } from "@/hooks/use-api-url";
 
 const saleSchema = z.object({
   menuItem: z.string().min(1, "Menu item name is required"),
@@ -50,16 +65,37 @@ const saleSchema = z.object({
   salePrice: z.coerce.number().min(0).optional(),
 });
 
-type Tab = "log" | "summary";
+type Tab = "log" | "summary" | "pdf";
+
+interface ParsedItem {
+  menuItem: string;
+  quantity: number;
+  salePrice: number | null;
+  date: string | null;
+  note: string | null;
+  selected: boolean;
+  editing: boolean;
+}
+
+type ImportStatus = "idle" | "uploading" | "done" | "error";
 
 export default function Sales() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("log");
 
+  // PDF import state
+  const [isDragging, setIsDragging] = useState(false);
+  const [importStatus, setImportStatus] = useState<ImportStatus>("idle");
+  const [importError, setImportError] = useState<string | null>(null);
+  const [parsedItems, setParsedItems] = useState<ParsedItem[]>([]);
+  const [importingAll, setImportingAll] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { selectedStore } = useStore();
+  const apiUrl = useApiUrl();
 
   const { data: sales, isLoading } = useListSales(
     { storeId: selectedStore?.id },
@@ -111,6 +147,100 @@ export default function Sales() {
     );
   };
 
+  // ── PDF import helpers ──
+  const processPdfFile = useCallback(async (file: File) => {
+    if (!file.type.includes("pdf")) {
+      setImportError("Please upload a PDF file.");
+      setImportStatus("error");
+      return;
+    }
+    setImportStatus("uploading");
+    setImportError(null);
+    setParsedItems([]);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(`${apiUrl}/api/usage/import-pdf`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setImportError(json.error ?? "Upload failed.");
+        setImportStatus("error");
+        return;
+      }
+      const items: ParsedItem[] = (json.items ?? []).map((item: Omit<ParsedItem, "selected" | "editing">) => ({
+        ...item,
+        selected: true,
+        editing: false,
+      }));
+      setParsedItems(items);
+      setImportStatus("done");
+    } catch {
+      setImportError("Network error. Please try again.");
+      setImportStatus("error");
+    }
+  }, [apiUrl]);
+
+  const handleFileDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) processPdfFile(file);
+  }, [processPdfFile]);
+
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processPdfFile(file);
+    e.target.value = "";
+  }, [processPdfFile]);
+
+  const resetPdf = () => {
+    setImportStatus("idle");
+    setImportError(null);
+    setParsedItems([]);
+  };
+
+  const updateItem = (idx: number, field: keyof ParsedItem, value: unknown) => {
+    setParsedItems(prev => prev.map((it, i) => i === idx ? { ...it, [field]: value } : it));
+  };
+
+  const handleImportAll = async () => {
+    const selected = parsedItems.filter(it => it.selected);
+    if (!selected.length) return;
+    setImportingAll(true);
+    let succeeded = 0;
+    for (const item of selected) {
+      await new Promise<void>((resolve) => {
+        createSale.mutate(
+          {
+            data: {
+              menuItem: item.menuItem,
+              quantity: item.quantity,
+              salePrice: item.salePrice ?? undefined,
+              storeId: selectedStore?.id,
+            }
+          },
+          {
+            onSuccess: () => { succeeded++; resolve(); },
+            onError: () => resolve(),
+          }
+        );
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: getListSalesQueryKey({ storeId: selectedStore?.id }) });
+    queryClient.invalidateQueries({ queryKey: getListInventoryQueryKey({ storeId: selectedStore?.id }) });
+    queryClient.invalidateQueries({ queryKey: getGetRecommendationsQueryKey({ storeId: selectedStore?.id }) });
+    setImportingAll(false);
+    toast({ title: `${succeeded} of ${selected.length} entries imported` });
+    resetPdf();
+    setActiveTab("log");
+  };
+
   // Build daily summary: group by date → { menuItem → qty }
   const dailySummary = useMemo(() => {
     if (!sales) return [];
@@ -124,7 +254,6 @@ export default function Sales() {
     return Object.values(map).sort((a, b) => b.date.localeCompare(a.date));
   }, [sales]);
 
-  // All unique menu items (for summary table columns)
   const allMenuItems = useMemo(() => {
     if (!sales) return [];
     const set = new Set(sales.map(s => s.menuItem));
@@ -153,6 +282,8 @@ export default function Sales() {
     searchQuery === "" ||
     Object.keys(day.items).some(item => item.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+
+  const selectedCount = parsedItems.filter(it => it.selected).length;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -233,6 +364,7 @@ export default function Sales() {
         {[
           { key: "log" as Tab, label: "Transaction Log" },
           { key: "summary" as Tab, label: "Daily Summary" },
+          { key: "pdf" as Tab, label: "Import from PDF" },
         ].map((tab) => (
           <button
             key={tab.key}
@@ -376,9 +508,6 @@ export default function Sales() {
                   </TableHeader>
                   <TableBody>
                     {filteredSummary.map((day) => {
-                      const displayedItems = searchQuery
-                        ? allMenuItems.filter(item => item.toLowerCase().includes(searchQuery.toLowerCase()))
-                        : allMenuItems;
                       return (
                         <TableRow key={day.date} className="border-b border-border/40 hover:bg-gray-50/80 transition-colors">
                           <TableCell className="pl-5 py-2.5 font-medium text-sm min-w-[120px]">
@@ -436,6 +565,223 @@ export default function Sales() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* ── PDF Import Tab ── */}
+      {activeTab === "pdf" && (
+        <div className="space-y-4">
+          {/* Upload zone */}
+          {importStatus === "idle" || importStatus === "error" ? (
+            <Card className="border border-border bg-card shadow-xs">
+              <CardContent className="p-6">
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleFileDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-xl border-2 border-dashed cursor-pointer transition-all py-14 px-6 text-center",
+                    isDragging
+                      ? "border-primary bg-primary/5 scale-[1.01]"
+                      : "border-border/70 hover:border-primary/40 hover:bg-muted/30"
+                  )}
+                >
+                  <div className="rounded-2xl bg-primary/10 p-4 mb-4 border border-primary/20">
+                    <UploadCloud className="h-8 w-8 text-primary" />
+                  </div>
+                  <p className="font-semibold text-sm mb-1">Drop a PDF here or click to browse</p>
+                  <p className="text-xs text-muted-foreground max-w-xs">
+                    Upload a delivery receipt, purchase order, or usage report. The AI will extract product names and quantities automatically.
+                  </p>
+                  {importStatus === "error" && importError && (
+                    <div className="mt-4 flex items-center gap-2 text-destructive text-xs font-medium bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                      <XCircle className="h-4 w-4 shrink-0" />
+                      {importError}
+                    </div>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ) : importStatus === "uploading" ? (
+            <Card className="border border-border bg-card shadow-xs">
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center justify-center py-14 gap-4">
+                  <div className="relative">
+                    <div className="rounded-2xl bg-primary/10 p-4 border border-primary/20">
+                      <FileText className="h-8 w-8 text-primary" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 rounded-full bg-card p-0.5">
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold text-sm mb-1">Reading your PDF…</p>
+                    <p className="text-xs text-muted-foreground">AI is extracting product usage data from your document</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {/* Results */}
+          {importStatus === "done" && (
+            <>
+              {parsedItems.length === 0 ? (
+                <Card className="border border-border bg-card shadow-xs">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+                      <div className="rounded-2xl bg-muted/50 p-4 border border-border/60">
+                        <FileUp className="h-8 w-8 text-muted-foreground/40" />
+                      </div>
+                      <p className="font-semibold text-sm">No items found</p>
+                      <p className="text-xs text-muted-foreground max-w-xs">
+                        The AI couldn't find any product usage entries in this PDF. Make sure the document contains product names and quantities.
+                      </p>
+                      <Button variant="outline" size="sm" onClick={resetPdf} className="mt-2">
+                        Try another file
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border border-border bg-card shadow-xs">
+                  <CardHeader className="pb-3 border-b border-border/60">
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                        <span className="text-sm font-semibold">
+                          {parsedItems.length} {parsedItems.length === 1 ? "item" : "items"} extracted
+                        </span>
+                        <span className="text-xs text-muted-foreground">— review and edit before importing</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={resetPdf}>
+                          Upload different file
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="h-8 gap-1.5"
+                          disabled={importingAll || selectedCount === 0}
+                          onClick={handleImportAll}
+                        >
+                          {importingAll ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <FileUp className="h-3.5 w-3.5" />
+                          )}
+                          Import {selectedCount > 0 ? `${selectedCount} ` : ""}selected
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50 border-b border-border hover:bg-gray-50">
+                            <TableHead className="w-10 pl-4 h-9">
+                              <input
+                                type="checkbox"
+                                className="h-3.5 w-3.5 rounded border-border accent-primary"
+                                checked={parsedItems.every(it => it.selected)}
+                                onChange={(e) => setParsedItems(prev => prev.map(it => ({ ...it, selected: e.target.checked })))}
+                              />
+                            </TableHead>
+                            <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Product / Item</TableHead>
+                            <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9 w-24">Qty</TableHead>
+                            <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide text-right h-9 w-32">Unit Price</TableHead>
+                            <TableHead className="text-xs font-semibold text-muted-foreground uppercase tracking-wide h-9">Note</TableHead>
+                            <TableHead className="w-10 h-9"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {parsedItems.map((item, idx) => (
+                            <TableRow
+                              key={idx}
+                              className={cn(
+                                "border-b border-border/40 transition-colors",
+                                item.selected ? "hover:bg-gray-50/80" : "opacity-40 hover:bg-gray-50/50"
+                              )}
+                            >
+                              <TableCell className="pl-4 py-2.5">
+                                <input
+                                  type="checkbox"
+                                  className="h-3.5 w-3.5 rounded border-border accent-primary"
+                                  checked={item.selected}
+                                  onChange={(e) => updateItem(idx, "selected", e.target.checked)}
+                                />
+                              </TableCell>
+                              <TableCell className="py-2 font-medium text-sm">
+                                {item.editing ? (
+                                  <Input
+                                    className="h-7 text-sm py-1 px-2"
+                                    value={item.menuItem}
+                                    onChange={(e) => updateItem(idx, "menuItem", e.target.value)}
+                                    onBlur={() => updateItem(idx, "editing", false)}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <span
+                                    className="cursor-pointer hover:text-primary transition-colors"
+                                    onClick={() => updateItem(idx, "editing", true)}
+                                    title="Click to edit"
+                                  >
+                                    {item.menuItem}
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-right py-2">
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  className="h-7 text-sm py-1 px-2 text-right w-20 ml-auto font-mono"
+                                  value={item.quantity}
+                                  onChange={(e) => updateItem(idx, "quantity", Math.max(1, parseInt(e.target.value) || 1))}
+                                />
+                              </TableCell>
+                              <TableCell className="text-right py-2">
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  className="h-7 text-sm py-1 px-2 text-right w-28 ml-auto font-mono"
+                                  placeholder="—"
+                                  value={item.salePrice ?? ""}
+                                  onChange={(e) => updateItem(idx, "salePrice", e.target.value ? parseFloat(e.target.value) : null)}
+                                />
+                              </TableCell>
+                              <TableCell className="py-2 text-xs text-muted-foreground max-w-[180px] truncate">
+                                {item.note ?? <span className="text-muted-foreground/30">—</span>}
+                              </TableCell>
+                              <TableCell className="py-2 pr-3">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                  onClick={() => setParsedItems(prev => prev.filter((_, i) => i !== idx))}
+                                  title="Remove row"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
       )}
     </div>
   );
