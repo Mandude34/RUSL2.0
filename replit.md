@@ -18,12 +18,13 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ## Artifacts
 
-### FlowStock (`artifacts/flowstock`)
+### sToK (`artifacts/flowstock`)
 Kitchen inventory management web app. Tracks ingredients, sales, recipes, waste, food costs and generates reorder recommendations.
 - React + Vite frontend at `/`
 - Uses `@workspace/api-client-react` generated hooks
 - Pages: Dashboard, Inventory, Recipes, Usage/Sales, Waste Tracking, Food Cost, Recommendations, AI Predictions, Analytics, Organizations
 - PDF export supported on Waste Tracking and Food Cost pages (via jsPDF)
+- **Theme**: Midnight Ops dark theme — sidebar `#0D1117`, content area `#161B22`, accent `#22D3EE` (cyan). Active nav uses a left indicator bar with glow + gradient overlay (no filled pill). CSS variables in `index.css` are set to dark mode by default.
 
 ## Structure
 

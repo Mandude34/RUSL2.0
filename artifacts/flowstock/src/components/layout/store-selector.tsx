@@ -25,11 +25,8 @@ export function StoreSelector() {
   }, [organizations, selectedOrganization]);
 
   return (
-    <div className="px-3 py-3 border-b border-slate-800 space-y-2.5">
-      <div className="space-y-1">
-        <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
-          <Building2 className="h-3 w-3" /> Organization
-        </label>
+    <div className="px-3 pb-4 space-y-1.5 shrink-0">
+      <div className="relative">
         <select
           value={selectedOrganization?.id.toString() || ""}
           onChange={(e) => {
@@ -37,33 +34,32 @@ export function StoreSelector() {
             setSelectedOrganization(org || null);
             setSelectedStore(null);
           }}
-          className="w-full h-8 text-sm rounded-md border border-slate-700 bg-slate-800 text-slate-200 px-2 focus:outline-none focus:ring-1 focus:ring-[hsl(158,42%,45%)] cursor-pointer appearance-none"
+          className="w-full appearance-none bg-[#161B22] border border-transparent hover:border-gray-800 text-gray-300 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#22D3EE] transition-all cursor-pointer"
         >
           <option value="" disabled>{isLoadingOrgs ? "Loading..." : "Select organization"}</option>
           {organizations?.map(org => (
             <option key={org.id} value={org.id.toString()}>{org.name}</option>
           ))}
         </select>
+        <Building2 className="absolute right-2.5 top-2.5 w-4 h-4 text-gray-500 pointer-events-none" />
       </div>
 
       {selectedOrganization && (
-        <div className="space-y-1 animate-in fade-in slide-in-from-top-1">
-          <label className="text-[10px] font-semibold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
-            <StoreIcon className="h-3 w-3" /> Location
-          </label>
+        <div className="relative animate-in fade-in slide-in-from-top-1">
           <select
             value={selectedStore?.id.toString() || ""}
             onChange={(e) => {
               const store = stores?.find(s => s.id.toString() === e.target.value);
               setSelectedStore(store || null);
             }}
-            className="w-full h-8 text-sm rounded-md border border-[hsl(158,42%,35%)] bg-[hsl(158,42%,18%)] text-[hsl(158,42%,75%)] px-2 focus:outline-none focus:ring-1 focus:ring-[hsl(158,42%,45%)] cursor-pointer appearance-none font-medium"
+            className="w-full appearance-none bg-[#161B22] border border-transparent hover:border-gray-800 text-gray-300 py-2 pl-3 pr-8 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#22D3EE] transition-all cursor-pointer font-medium"
           >
             <option value="" disabled>{isLoadingStores ? "Loading..." : "Select store"}</option>
             {stores?.map(store => (
               <option key={store.id} value={store.id.toString()}>{store.name}</option>
             ))}
           </select>
+          <StoreIcon className="absolute right-2.5 top-2.5 w-4 h-4 text-gray-500 pointer-events-none" />
         </div>
       )}
     </div>
