@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Package, Receipt, ArrowRight, Flame, DollarSign } from "lucide-react";
+import { TrendingUp, Package, Receipt, ArrowRight, Flame, DollarSign, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FlowStockIcon } from "@/components/logo";
 
@@ -13,9 +13,9 @@ const features = [
   },
   {
     icon: Receipt,
-    title: "Recipe Costing",
+    title: "Usage Tracking",
     description:
-      "Build recipes and automatically calculate portion costs from your latest ingredient prices. Protect your margins with precision.",
+      "Log exactly what gets used from each delivery. Understand consumption patterns and keep your stock levels accurate in real time.",
   },
   {
     icon: Flame,
@@ -27,7 +27,13 @@ const features = [
     icon: DollarSign,
     title: "Food Cost Reports",
     description:
-      "Instantly see your food cost percentage per recipe, total revenue, and ingredient spend — with one-click PDF export.",
+      "Instantly see your food cost percentage, total ingredient spend, and cost-per-unit trends — with one-click PDF export.",
+  },
+  {
+    icon: BarChart3,
+    title: "Cost Analytics",
+    description:
+      "Drill into what's coming in and going out. Track price changes over time and identify your highest-cost ingredients at a glance.",
   },
   {
     icon: TrendingUp,
@@ -39,9 +45,9 @@ const features = [
 
 export function LandingPage() {
   return (
-    <div className="min-h-[100dvh] bg-[hsl(220,18%,93%)] selection:bg-primary/20 flex flex-col">
+    <div className="min-h-[100dvh] bg-[hsl(0,0%,95%)] selection:bg-primary/20 flex flex-col">
       {/* Nav */}
-      <header className="sticky top-0 z-50 border-b border-[hsl(220,14%,85%)] bg-[hsl(220,13%,97%)]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-[hsl(0,0%,88%)] bg-[hsl(0,0%,97%)]/90 backdrop-blur-md">
         <nav className="flex items-center justify-between px-6 py-4 lg:px-10 max-w-7xl mx-auto" aria-label="Global">
           <div className="flex lg:flex-1">
             <div className="flex items-center gap-2.5 font-bold tracking-tight text-xl">
@@ -88,7 +94,7 @@ export function LandingPage() {
                 <span className="text-primary">modern kitchens</span>
               </h1>
               <p className="mt-7 text-lg leading-8 text-muted-foreground max-w-2xl mx-auto">
-                Take control of food costs, eliminate waste, and manage recipes with precision.
+                Take control of food costs, track usage, eliminate waste, and always know what to reorder.
                 Built for culinary professionals who demand excellence.
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-4">
