@@ -88,12 +88,10 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[hsl(158,42%,38%)] shadow-sm shadow-black/20">
             <FlowStockIcon className="h-4 w-4 text-white" />
           </div>
-          <span className="text-white">sToK</span>
+          <span className="text-white">RUSL</span>
         </div>
       </div>
-
       <StoreSelector />
-
       <nav className="flex flex-1 flex-col gap-0.5 p-3 overflow-y-auto">
         <div className="mb-1 px-2 pt-1 pb-1.5">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-600">Menu</span>
@@ -125,7 +123,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           </div>
         </Link>
       </nav>
-
       <UserNav />
     </>
   );
