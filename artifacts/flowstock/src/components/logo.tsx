@@ -35,7 +35,7 @@ export function FlowStockWordmark({
   return (
     <div className={cn("flex items-center gap-2.5 font-bold tracking-tight", className)}>
       <FlowStockIcon className={iconClassName} />
-      <span className={textClassName}>sToK</span>
+      <span className={textClassName}>RUSL</span>
     </div>
   );
 }

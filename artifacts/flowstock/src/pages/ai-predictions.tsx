@@ -128,7 +128,7 @@ export default function AIPredictions() {
             <div className="max-w-md space-y-2">
               <h3 className="text-lg font-semibold">Predict Your Week with AI</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                sToK analyzes your real sales history — by day of week and weekly trends — then
+                RUSL analyzes your real sales history — by day of week and weekly trends — then
                 maps predicted demand to ingredient usage based on your recipes. The AI tells you
                 exactly what to order, how much, and why.
               </p>

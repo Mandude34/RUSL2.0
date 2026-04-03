@@ -31,7 +31,7 @@ export function SignInPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
               <ChefHat className="h-6 w-6" />
             </div>
-            sToK
+            RUSL
           </div>
           <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-foreground">
             Sign in to your account
@@ -56,7 +56,7 @@ export function SignInPage() {
               <ChefHat className="h-12 w-12 text-primary" />
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-4">Master Your Kitchen Inventory</h2>
-            <p className="text-lg text-muted-foreground">sToK helps you track ingredients, manage recipes, and optimize your food costs with precision.</p>
+            <p className="text-lg text-muted-foreground">RUSL helps you track ingredients, manage recipes, and optimize your food costs with precision.</p>
           </div>
         </div>
       </div>
@@ -73,7 +73,7 @@ export function SignUpPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary text-primary-foreground shadow-sm">
               <ChefHat className="h-6 w-6" />
             </div>
-            sToK
+            RUSL
           </div>
           <h2 className="mt-8 text-2xl font-bold leading-9 tracking-tight text-foreground">
             Create your account

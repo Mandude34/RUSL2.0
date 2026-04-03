@@ -94,7 +94,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <div className="flex h-7 w-7 items-center justify-center rounded bg-[#22D3EE]/10">
             <div className="h-3.5 w-3.5 rounded-[3px] bg-[#22D3EE]" />
           </div>
-          <span className="font-bold text-lg tracking-tight text-white leading-none mt-0.5">sToK</span>
+          <span className="font-bold text-lg tracking-tight text-white leading-none mt-0.5">RUSL</span>
         </div>
       </div>
 

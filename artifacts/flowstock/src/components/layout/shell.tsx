@@ -13,7 +13,7 @@ export function Shell({ children }: { children: ReactNode }) {
               <div className="flex h-6 w-6 items-center justify-center rounded bg-[#22D3EE]/10">
                 <div className="h-3 w-3 rounded-[2px] bg-[#22D3EE]" />
               </div>
-              sToK
+              RUSL
             </div>
           </div>
         </header>

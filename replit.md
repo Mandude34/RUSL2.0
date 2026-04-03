@@ -18,7 +18,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ## Artifacts
 
-### sToK (`artifacts/flowstock`)
+### RUSL (`artifacts/flowstock`)
 Kitchen inventory management web app. Tracks ingredients, sales, recipes, waste, food costs and generates reorder recommendations.
 - React + Vite frontend at `/`
 - Uses `@workspace/api-client-react` generated hooks
