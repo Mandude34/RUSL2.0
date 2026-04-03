@@ -44,7 +44,11 @@ router.post("/inventory", async (req, res): Promise<void> => {
     return;
   }
   const [item] = await db.insert(inventoryTable).values(parsed.data).returning();
-  res.status(201).json(UpdateInventoryItemResponse.parse(item));
+  res.status(201).json(UpdateInventoryItemResponse.parse({
+    ...item,
+    costPerUnit: item.costPerUnit ?? undefined,
+    minStock: item.minStock ?? undefined,
+  }));
 });
 
 router.put("/inventory/:id", async (req, res): Promise<void> => {

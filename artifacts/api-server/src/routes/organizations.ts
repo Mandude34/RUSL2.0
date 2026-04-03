@@ -111,7 +111,12 @@ router.get("/organizations/:id/recipes", async (req, res): Promise<void> => {
     .from(recipesTable)
     .where(eq(recipesTable.organizationId, params.data.id))
     .orderBy(recipesTable.menuItem);
-  const result = recipes.map((r) => ({ ...r, isCompanyRecipe: true }));
+  const result = recipes.map((r) => ({
+    ...r,
+    storeId: r.storeId ?? undefined,
+    menuPrice: r.menuPrice ?? undefined,
+    isCompanyRecipe: true,
+  }));
   res.json(ListCompanyRecipesResponse.parse(result));
 });
 

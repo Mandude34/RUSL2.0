@@ -326,7 +326,7 @@ export default function OrganizationDetails() {
                     />
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <FormLabel>Ingredients per Serving</FormLabel>
+                        <label className="text-sm font-medium leading-none">Ingredients per Serving</label>
                         <Button type="button" variant="outline" size="sm" onClick={() => appendRecipe({ ingredientName: "", amountPerServing: 1 })}>
                           <Plus className="mr-2 h-3 w-3" /> Add Ingredient
                         </Button>
