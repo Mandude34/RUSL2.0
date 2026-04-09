@@ -1,12 +1,12 @@
 import express, { type Request, type Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import * as pinoHttp from "pino-http";
+
+const pinoHttp = require("pino-http");
 
 const app = express();
 
-// FIXED LOGGER
-const logger = pinoHttp.default();
+const logger = pinoHttp();
 
 app.use(cors());
 app.use(express.json());
