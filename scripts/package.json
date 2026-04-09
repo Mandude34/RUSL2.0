@@ -12,4 +12,3 @@
     "tsx": "catalog:"
   }
 }
-"postinstall": "pnpm install --no-frozen-lockfile"
