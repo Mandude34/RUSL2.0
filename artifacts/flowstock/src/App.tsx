@@ -20,16 +20,6 @@ import { SignInPage, SignUpPage } from "@/pages/auth";
 import { VeteranBadge } from "@/components/veteran-badge";
 import Waste from "@/pages/waste";
 import FoodCost from "@/pages/food-cost";
-import { setBaseUrl } from "@workspace/api-client-react";
-
-// Point API calls at a remote server when VITE_API_BASE_URL is set.
-// In development on Replit the variable is unset and requests go to the
-// same origin via the Express server. On Vercel set this to the deployed
-// API URL, e.g. https://my-api.replit.app
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-if (apiBaseUrl) {
-  setBaseUrl(apiBaseUrl);
-}
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;

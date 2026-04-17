@@ -2,7 +2,6 @@
 
 # compiled output
 dist
-public
 tmp
 out-tsc
 *.tsbuildinfo
@@ -48,7 +47,3 @@ Thumbs.db
 # Replit
 .cache/
 .local/
-.config/
-
-# Assets not needed in source control
-attached_assets/
