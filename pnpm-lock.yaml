@@ -6362,6 +6362,8 @@ snapshots:
   yocto-queue@1.2.2: {}
 
   yoctocolors@2.1.2: {}
+  pnpm install --no-frozen-lockfile
+  
 
   zod@3.25.76: {}
 
