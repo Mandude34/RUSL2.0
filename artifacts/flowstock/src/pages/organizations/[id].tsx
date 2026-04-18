@@ -154,9 +154,9 @@ export default function OrganizationDetails() {
     );
   };
 
-  const handleRecipeDelete = (id: number) => {
+  const handleRecipeDelete = (recipeId: number) => {
     deleteRecipe.mutate(
-      { id },
+      { id: orgId, recipeId },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListCompanyRecipesQueryKey(orgId) });
