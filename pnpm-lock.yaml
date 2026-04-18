@@ -7,6 +7,11 @@ settings:
   minimumReleaseAgeExclude:
     - '@replit/*'
     - stripe-replit-sync
+  onlyBuiltDependencies:
+    - '@swc/core'
+    - esbuild
+    - msw
+    - unrs-resolver
 
 catalogs:
   default:
