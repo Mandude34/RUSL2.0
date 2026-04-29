@@ -15,7 +15,6 @@ import Analytics from "@/pages/analytics";
 import Organizations from "@/pages/organizations/index";
 import OrganizationDetails from "@/pages/organizations/[id]";
 import { StoreProvider } from "@/hooks/use-store";
-import { LandingPage } from "@/pages/landing";
 import { SignInPage, SignUpPage } from "@/pages/auth";
 import { VeteranBadge } from "@/components/veteran-badge";
 import Waste from "@/pages/waste";
@@ -66,7 +65,7 @@ function HomeRedirect() {
         <Redirect to="/dashboard" />
       </Show>
       <Show when="signed-out">
-        <LandingPage />
+        <Redirect to="/sign-in" />
       </Show>
     </>
   );
