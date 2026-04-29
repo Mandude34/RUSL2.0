@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Package, Receipt, ArrowRight, Flame, DollarSign, BarChart3 } from "lucide-react";
+import { TrendingUp, Package, Receipt, Flame, DollarSign, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FlowStockIcon } from "@/components/logo";
 
@@ -58,11 +58,8 @@ export function LandingPage() {
             </div>
           </div>
           <div className="flex flex-1 justify-end gap-x-4 items-center">
-            <Link href="/sign-in" className="text-sm font-semibold leading-6 text-muted-foreground hover:text-foreground transition-colors">
-              Log in
-            </Link>
             <Button asChild size="sm" className="shadow-sm">
-              <Link href="/sign-up">Get started</Link>
+              <Link href="/sign-in">Get started</Link>
             </Button>
           </div>
         </nav>
@@ -99,17 +96,7 @@ export function LandingPage() {
               </p>
               <div className="mt-10 flex items-center justify-center gap-x-4">
                 <Button asChild size="lg" className="h-12 px-8 text-base shadow-sm">
-                  <Link href="/sign-up">Start for free</Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="h-12 px-8 text-base group bg-card border-border"
-                >
-                  <Link href="/sign-in" className="flex items-center gap-2">
-                    Log in <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
+                  <Link href="/sign-in">Start for free</Link>
                 </Button>
               </div>
             </motion.div>
@@ -166,7 +153,7 @@ export function LandingPage() {
               Get started free — no credit card required.
             </p>
             <Button asChild size="lg" className="mt-8 h-12 px-10 text-base shadow-sm">
-              <Link href="/sign-up">Create your account</Link>
+              <Link href="/sign-in">Create your account</Link>
             </Button>
           </div>
         </section>
