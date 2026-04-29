@@ -14,6 +14,9 @@ COPY . .
 # from being installed inside the container.
 RUN PNPM_CONFIG_MINIMUM_RELEASE_AGE=0 pnpm install --no-frozen-lockfile
 
-# Start the flowstock Vite dev server on port 8080
-EXPOSE 8080
-CMD ["pnpm", "-F", "@workspace/flowstock", "dev"]
+# Compile TypeScript to JavaScript via esbuild (outputs dist/index.mjs)
+RUN pnpm -F @workspace/api-server build
+
+# Start the api-server
+EXPOSE 3000
+CMD ["pnpm", "-F", "@workspace/api-server", "start"]
